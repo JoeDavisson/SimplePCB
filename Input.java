@@ -118,9 +118,10 @@ public class Input implements KeyListener, MouseListener, MouseMotionListener
   // mouseMotionListener
   public void mouseMoved(MouseEvent e)
   {
-    mousex = (e.getX() - Screen.xpos) / Screen.scale;
-    mousey = (e.getY() - Screen.ypos) / Screen.scale;
+    mousex = e.getX();
+    mousey = e.getY();
 
+/*
     if(mousex < 0)
       mousex = 0;
     if(mousey < 0)
@@ -129,6 +130,7 @@ public class Input implements KeyListener, MouseListener, MouseMotionListener
       mousex = Screen.w - 1;
     if(mousey > Screen.h - 1)
       mousey = Screen.h - 1;
+*/
   }
 
   public void mouseDragged(MouseEvent e)

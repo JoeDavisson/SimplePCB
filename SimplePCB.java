@@ -46,7 +46,6 @@ public class SimplePCB
   // start standalone version
   public SimplePCB()
   {
-    Rnd.set(12345);
   }
 
   public void about()
