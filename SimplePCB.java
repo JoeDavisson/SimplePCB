@@ -40,8 +40,7 @@ public class SimplePCB
 
   Input input;
 
-  public Bitmap backbuf;
-  public BufferedImage bi;
+  //public BufferedImage bi;
 
   // start standalone version
   public SimplePCB()
@@ -68,8 +67,6 @@ public class SimplePCB
     final int w = 1024;
     final int h = 768;
 */
-
-    Blend.setMode(Blend.NORMAL);
 
     final SimplePCB simplepcb = new SimplePCB();
 
