@@ -2,7 +2,7 @@
 
 import java.awt.event.*;
 
-public class Input implements KeyListener, MouseListener, MouseMotionListener
+public class Input implements KeyListener, MouseListener, MouseMotionListener, MouseWheelListener
 {
   // access through methods
   private boolean keyList[];
@@ -14,6 +14,8 @@ public class Input implements KeyListener, MouseListener, MouseMotionListener
   public boolean button2;
   public boolean button3;
   public boolean dragged;
+  public boolean wheelup;
+  public boolean wheeldown;
   public boolean keydown;
   public int lastkey = 0;
 
@@ -38,6 +40,8 @@ public class Input implements KeyListener, MouseListener, MouseMotionListener
     button2 = false;
     button3 = false;
     dragged = false;
+    wheelup = false;
+    wheeldown = false;
     keydown = false;
     lastkey = 0;
 
@@ -120,23 +124,26 @@ public class Input implements KeyListener, MouseListener, MouseMotionListener
   {
     mousex = e.getX();
     mousey = e.getY();
-
-/*
-    if(mousex < 0)
-      mousex = 0;
-    if(mousey < 0)
-      mousey = 0;
-    if(mousex > Screen.w - 1)
-      mousex = Screen.w - 1;
-    if(mousey > Screen.h - 1)
-      mousey = Screen.h - 1;
-*/
   }
 
   public void mouseDragged(MouseEvent e)
   {
     dragged = true;
     mouseMoved(e);
+  }
+
+  // mouseWheelListener
+  public void mouseWheelMoved(MouseWheelEvent e)
+  {
+    wheelup = false;
+    wheeldown = false;
+
+    int notches = e.getWheelRotation();
+
+    if(notches < 0)
+      wheelup = true;
+    else
+      wheeldown = true;
   }
 }
 

@@ -34,13 +34,18 @@ public class SimplePCB
   RenderPanel panel = null;
   boolean applet = false;
 
-  double traceSize = .02;
-  double padInnerSize = .02;
-  double padOuterSize = .04;
+  double traceSize = .0625;
+  double padInnerSize = .0625;
+  double padOuterSize = .1875;
+
+  int offsetx = 0;
+  int offsety = 0;
 
   Input input;
 
-  //public BufferedImage bi;
+  Board board = null;
+
+  int zoom = 64;
 
   // start standalone version
   public SimplePCB()
@@ -63,37 +68,19 @@ public class SimplePCB
 
   public static void main(String[] args)
   {
-/*
-    final int w = 1024;
-    final int h = 768;
-*/
-
     final SimplePCB simplepcb = new SimplePCB();
+    simplepcb.input = new Input();
 
-/*
-    simplepcb.backbuf = new Bitmap(w, h);
-    simplepcb.backbuf.clear(Col.makeRGB(0, 0, 0));
-    simplepcb.backbuf.rectfill(0, 0, 64, 64, Col.makeRGB(255, 0, 0), 0);
-    DataBuffer data_buffer = new DataBufferInt(simplepcb.backbuf.data, w * h);
-    int band_masks[] = { 0xFF0000, 0xFF00, 0xFF, 0xFF000000 };
-    WritableRaster write_raster =
-      Raster.createPackedRaster(data_buffer, w, h, w, band_masks, null);
-    ColorModel color_model = ColorModel.getRGBdefault();
-    simplepcb.bi = new BufferedImage(color_model, write_raster, false, null);
-*/
+    simplepcb.board = new Board(6.0, 4.0);
 
-    // input class needs these set
-/*
-    Screen.w = w;
-    Screen.h = h;
-*/
-
+    // create window
     JFrame frame = new JFrame("SimplePCB");
     frame.setLayout(new BorderLayout());
     frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     frame.setPreferredSize(new Dimension(640, 480));
     frame.setMinimumSize(new Dimension(640, 480));
     frame.setResizable(true);
+    frame.setFocusable(true);
     MainMenu menu = new MainMenu(simplepcb);
     frame.setJMenuBar(menu);
 
@@ -103,36 +90,69 @@ public class SimplePCB
     simplepcb.layers = new Layers(); 
     frame.add(simplepcb.layers, BorderLayout.EAST);
 
-/*
-    simplepcb.panel = new JPanel()
-    {
-      public void paintComponent(Graphics g)
-      {
-        Dimension d = simplepcb.panel.getSize();
-
-        g.setColor(Color.BLACK);
-        g.fillRect(0, 0, d.width, d.height);
-        //g.drawImage(simplepcb.bi, 0, 0, w, h, null);
-      }
-    };
-*/
-
-/*
-    simplepcb.panel.setSize(640, 480);
-    simplepcb.panel.setPreferredSize(new Dimension(640, 480));
-    simplepcb.panel.setLayout(new BorderLayout());
-*/
-    simplepcb.panel = new RenderPanel();
+    simplepcb.panel = new RenderPanel(simplepcb);
     frame.add(simplepcb.panel, BorderLayout.CENTER);
 
-    simplepcb.input = new Input();
+    simplepcb.panel.setFocusable(true);
     simplepcb.panel.addKeyListener(simplepcb.input);
     simplepcb.panel.addMouseListener(simplepcb.input);
     simplepcb.panel.addMouseMotionListener(simplepcb.input);
-    simplepcb.panel.setFocusable(true);
+    simplepcb.panel.addMouseWheelListener(simplepcb.input);
 
     frame.pack();
     frame.setVisible(true);
     simplepcb.win = (Frame)frame;
+
+    while(true)
+    {
+      // zoom in
+      if(simplepcb.input.wheelup)
+      {
+        simplepcb.input.wheelup = false;
+        simplepcb.zoom += 64;
+        if(simplepcb.zoom > (64 * 8))
+          simplepcb.zoom = (64 * 8);
+        simplepcb.panel.repaint();
+      }
+
+      // zoom out
+      if(simplepcb.input.wheeldown)
+      {
+        simplepcb.input.wheeldown = false;
+        simplepcb.zoom -= 64;
+        if(simplepcb.zoom < 64)
+          simplepcb.zoom = 64;
+        simplepcb.panel.repaint();
+      }
+
+      // move
+      int last_offsetx = simplepcb.input.mousex - simplepcb.offsetx;
+      int last_offsety = simplepcb.input.mousey - simplepcb.offsety;
+
+      while(simplepcb.input.button2)
+      {
+        simplepcb.offsetx = simplepcb.input.mousex - last_offsetx;
+        simplepcb.offsety = simplepcb.input.mousey - last_offsety;
+
+        simplepcb.panel.repaint();
+
+        try
+        {
+          Thread.sleep(50);
+        }
+        catch(InterruptedException e)
+        {
+        }
+      }
+
+      // sleep
+      try
+      {
+        Thread.sleep(50);
+      }
+      catch(InterruptedException e)
+      {
+      }
+    }
   }
 }
