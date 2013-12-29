@@ -105,17 +105,32 @@ public class RenderPanel extends JPanel
     draw_grid(g, w, h, new Color(64, 64, 64));
 
     // testing
+/*
     Trace testTrace = new Trace(simplepcb.traceSize);
     testTrace.add(1.0, 1.0);
     testTrace.add(1.0, 2.0);
     testTrace.add(2.0, 3.0);
     testTrace.add(2.0, 4.0);
 
-    draw_board(g, simplepcb.board, new Color(255, 255, 0));
     Pad testPad = new Pad(1.0, 1.0, simplepcb.padInnerSize, simplepcb.padOuterSize);
 
     draw_trace(g, testTrace, new Color(0, 255, 0));
     draw_pad(g, testPad, new Color(0, 255, 0));
+*/
+    // render board
+    draw_board(g, simplepcb.board, new Color(255, 255, 0));
+
+    int i;
+    Board board = simplepcb.board;
+    for(i = 0; i < board.max; i++)
+    {
+      if(board.trace[i].status)
+        draw_trace(g, board.trace[i], new Color(0, 255, 0));
+
+      // always draw pads last!
+      if(board.pad[i].status)
+        draw_pad(g, board.pad[i], new Color(0, 255, 0));
+    } 
   }
 }
 

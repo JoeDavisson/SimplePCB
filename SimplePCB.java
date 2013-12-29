@@ -136,23 +136,72 @@ public class SimplePCB
 
         simplepcb.panel.repaint();
 
-        try
+        simplepcb.sleep();
+      }
+
+      // tool
+      if(simplepcb.input.button1)
+      {
+        simplepcb.input.button1 = false;
+
+        int zoom = simplepcb.zoom;
+        int ox = simplepcb.offsetx;
+        int oy = simplepcb.offsety;
+ 
+        double x = (double)(simplepcb.input.mousex - ox) / zoom;
+        double y = (double)(simplepcb.input.mousey - oy) / zoom;
+
+        switch(simplepcb.tools.mode)
         {
-          Thread.sleep(50);
-        }
-        catch(InterruptedException e)
-        {
+          case 0:
+            break;
+          case 1:
+            break;
+          case 2:
+            simplepcb.board.addPad(x, y, simplepcb.padInnerSize, simplepcb.padOuterSize);
+            simplepcb.panel.repaint();
+            break;
+          case 3:
+            // add first segment
+            Trace trace = simplepcb.board.addTrace(x, y, simplepcb.traceSize);
+            simplepcb.panel.repaint();
+            while(true)
+            {
+            // next segment
+              if(simplepcb.input.button1)
+              {
+                x = (double)(simplepcb.input.mousex - ox) / zoom;
+                y = (double)(simplepcb.input.mousey - oy) / zoom;
+
+                simplepcb.input.button1 = false;
+                trace.add(x, y);
+                simplepcb.panel.repaint();
+              } 
+              // done
+              if(simplepcb.input.button3)
+                break; 
+
+              simplepcb.sleep();
+            }
+            break;
+          case 4:
+            break;
         }
       }
 
-      // sleep
-      try
-      {
-        Thread.sleep(50);
-      }
-      catch(InterruptedException e)
-      {
-      }
+      simplepcb.sleep();
+    }
+  }
+
+  private void sleep()
+  {
+    // sleep
+    try
+    {
+      Thread.sleep(50);
+    }
+    catch(InterruptedException e)
+    {
     }
   }
 }

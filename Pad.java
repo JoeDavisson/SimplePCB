@@ -4,6 +4,7 @@ public class Pad
   double y;
   double innerSize;
   double outerSize;
+  boolean status = false;
 
   Pad(double temp_x, double temp_y, double temp_innerSize, double temp_outerSize)
   {
@@ -11,6 +12,7 @@ public class Pad
     y = temp_y;
     innerSize = temp_innerSize;
     outerSize = temp_outerSize;
+    status = false;
   }
 
 }

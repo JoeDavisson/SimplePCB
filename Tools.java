@@ -6,6 +6,8 @@ import javax.imageio.*;
 
 public class Tools extends JToolBar
 {
+  int mode = 0;
+
   JToggleButton select = null;
   JToggleButton edit = null;
   JToggleButton pad = null;
@@ -25,6 +27,7 @@ public class Tools extends JToolBar
       {
         public void actionPerformed(ActionEvent e)
         {
+          mode = 0;
         }
       } );
 
@@ -36,6 +39,7 @@ public class Tools extends JToolBar
       {
         public void actionPerformed(ActionEvent e)
         {
+          mode = 1;
         }
       } );
 
@@ -47,6 +51,7 @@ public class Tools extends JToolBar
       {
         public void actionPerformed(ActionEvent e)
         {
+          mode = 2;
         }
       } );
 
@@ -58,6 +63,7 @@ public class Tools extends JToolBar
       {
         public void actionPerformed(ActionEvent e)
         {
+          mode = 3;
         }
       } );
 
@@ -69,6 +75,7 @@ public class Tools extends JToolBar
       {
         public void actionPerformed(ActionEvent e)
         {
+          mode = 4;
         }
       } );
 
