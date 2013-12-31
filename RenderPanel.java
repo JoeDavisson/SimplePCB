@@ -36,6 +36,18 @@ public class RenderPanel extends JPanel
                  ox + (int)(trace.x[i - 1] * zoom),
                  oy + (int)(trace.y[i - 1] * zoom));
     }
+
+    if(trace == simplepcb.selectedTrace)
+    {
+      g.setColor(Color.WHITE);
+      for(i = 0; i < trace.length; i++)
+      {
+        g.fillRect(ox + (int)(trace.x[i] * zoom) - zoom / 100,
+                   oy + (int)(trace.y[i] * zoom) - zoom / 100,
+                   (2 * zoom) / 100,
+                   (2 * zoom) / 100);
+      }
+    }
   }
 
   private void draw_pad(Graphics2D g, Pad pad, Color color)
@@ -49,7 +61,11 @@ public class RenderPanel extends JPanel
     double w1 = pad.outerSize;
     double w2 = pad.innerSize;
 
-    g.setColor(color);
+    if(pad == simplepcb.selectedPad)
+      g.setColor(new Color(255, 255, 255));
+    else
+      g.setColor(color);
+
     g.fillOval(ox + (int)((xx - w1 / 2) * zoom), oy + (int)((yy - w1 / 2) * zoom), (int)(w1 * zoom), (int)(w1 * zoom));
     g.setColor(new Color(0, 0, 0));
     g.fillOval(ox + (int)((xx - w2 / 2) * zoom), oy + (int)((yy - w2 / 2) * zoom), (int)(w2 * zoom), (int)(w2 * zoom));
@@ -92,8 +108,8 @@ public class RenderPanel extends JPanel
     int zoom = simplepcb.zoom;
     int ox = simplepcb.offsetx;
     int oy = simplepcb.offsety;
-    double x = (double)(simplepcb.input.mousex - ox) / zoom;
-    double y = (double)(simplepcb.input.mousey - oy) / zoom;
+    double x = (double)(simplepcb.input.mousex - ox) / zoom + .025;
+    double y = (double)(simplepcb.input.mousey - oy) / zoom + .025;
     x = (float)((int)(x * 20)) / 20;
     y = (float)((int)(y * 20)) / 20;
 
@@ -131,19 +147,38 @@ public class RenderPanel extends JPanel
 
     int i;
     Board board = simplepcb.board;
+
+    // green traces
     for(i = 0; i < board.max; i++)
     {
-      if(board.trace[i].status)
+      if(board.trace[i].status && board.trace[i].layer == 2)
         draw_trace(g, board.trace[i], new Color(0, 255, 0));
+    }
 
-      // always draw pads last!
+    // green pads
+    for(i = 0; i < board.max; i++)
+    {
       if(board.pad[i].status)
         draw_pad(g, board.pad[i], new Color(0, 255, 0));
     } 
 
+    // red traces
+    for(i = 0; i < board.max; i++)
+    {
+      if(board.trace[i].status && board.trace[i].layer == 1)
+        draw_trace(g, board.trace[i], new Color(255, 0, 0));
+    }
+
+    // yellow traces
+    for(i = 0; i < board.max; i++)
+    {
+      if(board.trace[i].status && board.trace[i].layer == 0)
+        draw_trace(g, board.trace[i], new Color(255, 255, 0));
+    }
+
     if(simplepcb.currentTrace != null)
     {
-      draw_segment_preview(g, new Color(255, 255, 255));  
+      draw_segment_preview(g, new Color(128, 255, 128));  
     }
   }
 }

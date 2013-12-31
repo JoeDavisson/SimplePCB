@@ -10,6 +10,8 @@ public class Layers extends JToolBar
   JToggleButton red = null;
   JToggleButton green = null;
 
+  int current = 0;
+
   Layers()
   {
     super("Layers", VERTICAL);
@@ -23,6 +25,7 @@ public class Layers extends JToolBar
       {
         public void actionPerformed(ActionEvent e)
         {
+          current = 0;
         }
       } );
 
@@ -34,6 +37,7 @@ public class Layers extends JToolBar
       {
         public void actionPerformed(ActionEvent e)
         {
+          current = 1;
         }
       } );
 
@@ -45,6 +49,7 @@ public class Layers extends JToolBar
       {
         public void actionPerformed(ActionEvent e)
         {
+          current = 2;
         }
       } );
 

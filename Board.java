@@ -19,7 +19,7 @@ public class Board
 
     for(i = 0; i < max; i++)
     {
-      trace[i] = new Trace(0);
+      trace[i] = new Trace(0, 0);
       pad[i] = new Pad(0, 0, 0, 0);
     }
   }
@@ -48,7 +48,7 @@ public class Board
     pad[use].status = true;
   }
 
-  public Trace addTrace(double x, double y, double size)
+  public Trace addTrace(double x, double y, double size, int layer)
   {
     int i;
     int use = -1;
@@ -67,6 +67,7 @@ public class Board
 
     trace[use].size = size;
     trace[use].add(x, y);
+    trace[use].layer = layer;
     trace[use].status = true;
 
     return trace[use];

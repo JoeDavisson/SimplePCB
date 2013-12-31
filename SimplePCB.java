@@ -34,9 +34,9 @@ public class SimplePCB
   RenderPanel panel = null;
   boolean applet = false;
 
-  double traceSize = .0625;
-  double padInnerSize = .0625;
-  double padOuterSize = .1875;
+  double traceSize = .03125;
+  double padInnerSize = .03125;
+  double padOuterSize = .08;
 
   int offsetx = 0;
   int offsety = 0;
@@ -47,6 +47,8 @@ public class SimplePCB
 
   int zoom = 100;
   Trace currentTrace = null;
+  Pad selectedPad = null;
+  Trace selectedTrace = null;
 
   // start standalone version
   public SimplePCB()
@@ -104,7 +106,9 @@ public class SimplePCB
     frame.setVisible(true);
     simplepcb.win = (Frame)frame;
 
-    boolean trace_started = false;
+    simplepcb.currentTrace = null;
+
+    int i, j;
 
     while(true)
     {
@@ -113,10 +117,10 @@ public class SimplePCB
       int ox = simplepcb.offsetx;
       int oy = simplepcb.offsety;
       int zoom = simplepcb.zoom;
-      double x = (double)(mousex - ox) / zoom;
-      double y = (double)(mousey - oy) / zoom;
-      x = (float)((int)(x * 20)) / 20;
-      y = (float)((int)(y * 20)) / 20;
+      double x = (double)(mousex - ox) / zoom + .025;
+      double y = (double)(mousey - oy) / zoom + .025;
+      double gridx = (float)((int)(x * 20)) / 20;
+      double gridy = (float)((int)(y * 20)) / 20;
 
       // zoom in
       if(simplepcb.input.wheelup)
@@ -164,7 +168,7 @@ public class SimplePCB
       }
 
       // continue trace
-      if(trace_started)
+      if(simplepcb.currentTrace != null)
       {
         simplepcb.panel.repaint();
               
@@ -172,7 +176,7 @@ public class SimplePCB
         if(simplepcb.input.button1)
         {
           simplepcb.input.button1 = false;
-          simplepcb.currentTrace.add(x, y);
+          simplepcb.currentTrace.add(gridx, gridy);
           simplepcb.panel.repaint();
         } 
 
@@ -182,39 +186,216 @@ public class SimplePCB
           simplepcb.input.button3 = false;
           simplepcb.currentTrace = null;
           simplepcb.panel.repaint();
-          trace_started = false; 
         }
 
         continue;
       }
 
-      // tool
+      // left button tool
       if(simplepcb.input.button1)
       {
-        simplepcb.input.button1 = false;
-
         switch(simplepcb.tools.mode)
         {
           case 0:
+            // select trace
+            simplepcb.selectedTrace = null;
+
+            for(i = 0; i < simplepcb.board.max; i++)
+            {
+              if(simplepcb.board.trace[i].status)
+              {
+                for(j = 1; j < simplepcb.board.trace[i].length; j++)
+                {
+                  double x1 = simplepcb.board.trace[i].x[j];
+                  double x2 = simplepcb.board.trace[i].x[j - 1];
+                  double y1 = simplepcb.board.trace[i].y[j];
+                  double y2 = simplepcb.board.trace[i].y[j - 1];
+
+                  boolean pointOnLine = true;
+                  double crossProduct = (y - y1) * (x2 - x1) - (x - x1) * (y2 - y1);
+                  if(Math.abs(crossProduct) > simplepcb.board.trace[i].size)
+                    pointOnLine = false;
+                  double dotProduct = (x - x1) * (x2 - x1) + (y - y1) * (y2 - y1);
+                  if(dotProduct < 0)
+                    pointOnLine = false;
+                  double squaredLength = (x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1);
+                  if(dotProduct > squaredLength)
+                    pointOnLine = false;
+
+                  if(pointOnLine)
+                  {
+                    simplepcb.selectedTrace = simplepcb.board.trace[i];
+                    break;
+                  }
+                }
+              }
+            }
+
+            // select pad
+            simplepcb.selectedPad = null;
+
+            for(i = 0; i < simplepcb.board.max; i++)
+            {
+              if( simplepcb.board.pad[i].status &&
+                  (Math.abs(x - simplepcb.board.pad[i].x) < simplepcb.board.pad[i].outerSize) &&
+                  (Math.abs(y - simplepcb.board.pad[i].y) < simplepcb.board.pad[i].outerSize) )
+              {
+                simplepcb.selectedPad = simplepcb.board.pad[i];
+                simplepcb.selectedTrace = null;
+                break;
+              }
+            }
+
+            simplepcb.panel.repaint();
+
+            // move trace
+            if(simplepcb.selectedTrace != null)
+            {
+              boolean move_trace = false;
+
+              for(i = 1; i < simplepcb.selectedTrace.length; i++)
+              {
+                double x1 = simplepcb.selectedTrace.x[i];
+                double x2 = simplepcb.selectedTrace.x[i - 1];
+                double y1 = simplepcb.selectedTrace.y[i];
+                double y2 = simplepcb.selectedTrace.y[i - 1];
+
+                boolean pointOnLine = true;
+
+                double crossProduct = (y - y1) * (x2 - x1) - (x - x1) * (y2 - y1);
+                 if(Math.abs(crossProduct) > simplepcb.selectedTrace.size)
+                  pointOnLine = false;
+                double dotProduct = (x - x1) * (x2 - x1) + (y - y1) * (y2 - y1);
+                if(dotProduct < 0)
+                  pointOnLine = false;
+                double squaredLength = (x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1);
+                if(dotProduct > squaredLength)
+                  pointOnLine = false;
+
+                if(pointOnLine)
+                {
+                  move_trace = true;
+                  break;
+                }
+              }
+
+              if(move_trace)
+              {
+                double oldgridx = gridx;
+                double oldgridy = gridy;
+
+                Trace tempTrace = new Trace(0, 0);
+                tempTrace.copy(simplepcb.selectedTrace);
+
+                while(simplepcb.input.button1)
+                {
+                  mousex = simplepcb.input.mousex;
+                  mousey = simplepcb.input.mousey;
+                  ox = simplepcb.offsetx;
+                  oy = simplepcb.offsety;
+                  zoom = simplepcb.zoom;
+                  x = (double)(mousex - ox) / zoom + .025;
+                  y = (double)(mousey - oy) / zoom + .025;
+                  gridx = (float)((int)(x * 20)) / 20;
+                  gridy = (float)((int)(y * 20)) / 20;
+
+                  double deltax = gridx - oldgridx;
+                  double deltay = gridy - oldgridy;
+
+                  for(i = 0; i < simplepcb.selectedTrace.length; i++)
+                  {
+                    simplepcb.selectedTrace.x[i] = tempTrace.x[i] + deltax;
+                    simplepcb.selectedTrace.y[i] = tempTrace.y[i] + deltay;
+                  }
+
+                  simplepcb.panel.repaint();
+                  simplepcb.sleep();
+                }
+              }
+            }
+
+            // move pad
+            if(simplepcb.selectedPad != null)
+            {
+              if( simplepcb.selectedPad.status &&
+                  (Math.abs(x - simplepcb.selectedPad.x) < simplepcb.selectedPad.outerSize) &&
+                  (Math.abs(y - simplepcb.selectedPad.y) < simplepcb.selectedPad.outerSize) )
+              {
+                while(simplepcb.input.button1)
+                {
+                  mousex = simplepcb.input.mousex;
+                  mousey = simplepcb.input.mousey;
+                  ox = simplepcb.offsetx;
+                  oy = simplepcb.offsety;
+                  zoom = simplepcb.zoom;
+                  x = (double)(mousex - ox) / zoom + .025;
+                  y = (double)(mousey - oy) / zoom + .025;
+                  gridx = (float)((int)(x * 20)) / 20;
+                  gridy = (float)((int)(y * 20)) / 20;
+
+                  simplepcb.selectedPad.x = gridx;
+                  simplepcb.selectedPad.y = gridy;
+
+                  simplepcb.panel.repaint();
+                  simplepcb.sleep();
+                }
+
+                simplepcb.panel.repaint();
+              }
+            }
             break;
           case 1:
+            // move trace segments
+            int use = -1;
+
+            if(simplepcb.selectedTrace != null)
+            {
+              for(i = 0; i < simplepcb.selectedTrace.length; i++)
+              {
+                if( (Math.abs(x - simplepcb.selectedTrace.x[i]) < .05) &&
+                    (Math.abs(y - simplepcb.selectedTrace.y[i]) < .05) )
+                {
+                  while(simplepcb.input.button1)
+                  {
+                    mousex = simplepcb.input.mousex;
+                    mousey = simplepcb.input.mousey;
+                    ox = simplepcb.offsetx;
+                    oy = simplepcb.offsety;
+                    zoom = simplepcb.zoom;
+                    x = (double)(mousex - ox) / zoom + .025;
+                    y = (double)(mousey - oy) / zoom + .025;
+                    gridx = (float)((int)(x * 20)) / 20;
+                    gridy = (float)((int)(y * 20)) / 20;
+
+                    simplepcb.selectedTrace.x[i] = gridx;
+                    simplepcb.selectedTrace.y[i] = gridy;
+
+                    simplepcb.panel.repaint();
+                    simplepcb.sleep();
+                  }
+                }
+              }
+              simplepcb.panel.repaint();
+            }
             break;
           case 2:
-            simplepcb.board.addPad(x, y, simplepcb.padInnerSize, simplepcb.padOuterSize);
+            simplepcb.board.addPad(gridx, gridy, simplepcb.padInnerSize, simplepcb.padOuterSize);
             simplepcb.panel.repaint();
             break;
           case 3:
-            if(trace_started == false)
+            // new trace
+            if(simplepcb.currentTrace == null)
             {
               // add first segment
-              simplepcb.currentTrace = simplepcb.board.addTrace(x, y, simplepcb.traceSize);
+              simplepcb.currentTrace = simplepcb.board.addTrace(gridx, gridy, simplepcb.traceSize, simplepcb.layers.current);
               simplepcb.panel.repaint();
-              trace_started = true;
             }
             break;
           case 4:
             break;
         }
+
+        simplepcb.input.button1 = false;
       }
 
       simplepcb.sleep();
