@@ -45,7 +45,8 @@ public class SimplePCB
 
   Board board = null;
 
-  int zoom = 64;
+  int zoom = 100;
+  Trace currentTrace = null;
 
   // start standalone version
   public SimplePCB()
@@ -103,53 +104,94 @@ public class SimplePCB
     frame.setVisible(true);
     simplepcb.win = (Frame)frame;
 
+    boolean trace_started = false;
+
     while(true)
     {
+      int mousex = simplepcb.input.mousex;
+      int mousey = simplepcb.input.mousey;
+      int ox = simplepcb.offsetx;
+      int oy = simplepcb.offsety;
+      int zoom = simplepcb.zoom;
+      double x = (double)(mousex - ox) / zoom;
+      double y = (double)(mousey - oy) / zoom;
+      x = (float)((int)(x * 20)) / 20;
+      y = (float)((int)(y * 20)) / 20;
+
       // zoom in
       if(simplepcb.input.wheelup)
       {
         simplepcb.input.wheelup = false;
-        simplepcb.zoom += 64;
-        if(simplepcb.zoom > (64 * 8))
-          simplepcb.zoom = (64 * 8);
+        simplepcb.zoom += 100;
+
+        if(simplepcb.zoom > (100 * 8))
+          simplepcb.zoom = (100 * 8);
         simplepcb.panel.repaint();
+
+        continue;
       }
 
       // zoom out
       if(simplepcb.input.wheeldown)
       {
         simplepcb.input.wheeldown = false;
-        simplepcb.zoom -= 64;
-        if(simplepcb.zoom < 64)
-          simplepcb.zoom = 64;
+        simplepcb.zoom -= 100;
+
+        if(simplepcb.zoom < 100)
+          simplepcb.zoom = 100;
         simplepcb.panel.repaint();
+
+        continue;
       }
 
-      // move
-      int last_offsetx = simplepcb.input.mousex - simplepcb.offsetx;
-      int last_offsety = simplepcb.input.mousey - simplepcb.offsety;
-
-      while(simplepcb.input.button2)
+      // pan view
+      if(simplepcb.input.button2)
       {
-        simplepcb.offsetx = simplepcb.input.mousex - last_offsetx;
-        simplepcb.offsety = simplepcb.input.mousey - last_offsety;
+        int last_offsetx = mousex - ox;
+        int last_offsety = mousey - oy;
 
+        while(simplepcb.input.button2)
+        {
+          simplepcb.offsetx = simplepcb.input.mousex - last_offsetx;
+          simplepcb.offsety = simplepcb.input.mousey - last_offsety;
+
+          simplepcb.panel.repaint();
+
+          simplepcb.sleep();
+        }
+
+        continue;
+      }
+
+      // continue trace
+      if(trace_started)
+      {
         simplepcb.panel.repaint();
+              
+        // next segment
+        if(simplepcb.input.button1)
+        {
+          simplepcb.input.button1 = false;
+          simplepcb.currentTrace.add(x, y);
+          simplepcb.panel.repaint();
+        } 
 
-        simplepcb.sleep();
+        // done
+        if(simplepcb.input.button3)
+        {
+          simplepcb.input.button3 = false;
+          simplepcb.currentTrace = null;
+          simplepcb.panel.repaint();
+          trace_started = false; 
+        }
+
+        continue;
       }
 
       // tool
       if(simplepcb.input.button1)
       {
         simplepcb.input.button1 = false;
-
-        int zoom = simplepcb.zoom;
-        int ox = simplepcb.offsetx;
-        int oy = simplepcb.offsety;
- 
-        double x = (double)(simplepcb.input.mousex - ox) / zoom;
-        double y = (double)(simplepcb.input.mousey - oy) / zoom;
 
         switch(simplepcb.tools.mode)
         {
@@ -162,26 +204,12 @@ public class SimplePCB
             simplepcb.panel.repaint();
             break;
           case 3:
-            // add first segment
-            Trace trace = simplepcb.board.addTrace(x, y, simplepcb.traceSize);
-            simplepcb.panel.repaint();
-            while(true)
+            if(trace_started == false)
             {
-            // next segment
-              if(simplepcb.input.button1)
-              {
-                x = (double)(simplepcb.input.mousex - ox) / zoom;
-                y = (double)(simplepcb.input.mousey - oy) / zoom;
-
-                simplepcb.input.button1 = false;
-                trace.add(x, y);
-                simplepcb.panel.repaint();
-              } 
-              // done
-              if(simplepcb.input.button3)
-                break; 
-
-              simplepcb.sleep();
+              // add first segment
+              simplepcb.currentTrace = simplepcb.board.addTrace(x, y, simplepcb.traceSize);
+              simplepcb.panel.repaint();
+              trace_started = true;
             }
             break;
           case 4:

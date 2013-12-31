@@ -73,7 +73,7 @@ public class RenderPanel extends JPanel
     int oy = simplepcb.offsety;
     w = ((w + zoom) / zoom) * zoom;
     h = ((h + zoom) / zoom) * zoom;
-    int fix = zoom * 64;
+    int fix = zoom * 100;
 
     // draw grid
     g.setStroke(new BasicStroke(1));
@@ -81,10 +81,32 @@ public class RenderPanel extends JPanel
 
     int x, y;
 
-    for(x = 0; x < w; x += zoom / 8)
+    for(x = 0; x < w; x += zoom / 10)
       g.drawLine((x + ox + fix) % w, 0, (x + ox + fix) % w, h);
-    for(y = 0; y < h; y += zoom / 8)
+    for(y = 0; y < h; y += zoom / 10)
       g.drawLine(0, (y + oy + fix) % h, w, (y + oy + fix) % h);
+  }
+
+  public void draw_segment_preview(Graphics2D g, Color color)
+  {
+    int zoom = simplepcb.zoom;
+    int ox = simplepcb.offsetx;
+    int oy = simplepcb.offsety;
+    double x = (double)(simplepcb.input.mousex - ox) / zoom;
+    double y = (double)(simplepcb.input.mousey - oy) / zoom;
+    x = (float)((int)(x * 20)) / 20;
+    y = (float)((int)(y * 20)) / 20;
+
+    Trace trace = simplepcb.currentTrace;
+
+    g.setStroke(new BasicStroke((int)(trace.size * zoom),
+                                BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+    g.setColor(color);
+
+    g.drawLine(ox + (int)(trace.x[trace.length - 1] * zoom),
+                 oy + (int)(trace.y[trace.length - 1] * zoom),
+                 ox + (int)(x * zoom),
+                 oy + (int)(y * zoom));
   }
 
   public void paintComponent(Graphics g1)
@@ -104,19 +126,6 @@ public class RenderPanel extends JPanel
 
     draw_grid(g, w, h, new Color(64, 64, 64));
 
-    // testing
-/*
-    Trace testTrace = new Trace(simplepcb.traceSize);
-    testTrace.add(1.0, 1.0);
-    testTrace.add(1.0, 2.0);
-    testTrace.add(2.0, 3.0);
-    testTrace.add(2.0, 4.0);
-
-    Pad testPad = new Pad(1.0, 1.0, simplepcb.padInnerSize, simplepcb.padOuterSize);
-
-    draw_trace(g, testTrace, new Color(0, 255, 0));
-    draw_pad(g, testPad, new Color(0, 255, 0));
-*/
     // render board
     draw_board(g, simplepcb.board, new Color(255, 255, 0));
 
@@ -131,6 +140,11 @@ public class RenderPanel extends JPanel
       if(board.pad[i].status)
         draw_pad(g, board.pad[i], new Color(0, 255, 0));
     } 
+
+    if(simplepcb.currentTrace != null)
+    {
+      draw_segment_preview(g, new Color(255, 255, 255));  
+    }
   }
 }
 
