@@ -13,6 +13,7 @@ public class Input implements KeyListener, MouseListener, MouseMotionListener, M
   public boolean button1;
   public boolean button2;
   public boolean button3;
+  public boolean doubleclicked;
   public boolean dragged;
   public boolean wheelup;
   public boolean wheeldown;
@@ -117,6 +118,8 @@ public class Input implements KeyListener, MouseListener, MouseMotionListener, M
 
   public void mouseClicked(MouseEvent e)
   {
+    if(e.getButton() == MouseEvent.BUTTON1 && e.getClickCount() == 2)
+      doubleclicked = true;
   }
 
   // mouseMotionListener

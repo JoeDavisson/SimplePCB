@@ -42,10 +42,20 @@ public class RenderPanel extends JPanel
       g.setColor(Color.WHITE);
       for(i = 0; i < trace.length; i++)
       {
-        g.fillRect(ox + (int)(trace.x[i] * zoom) - zoom / 100,
-                   oy + (int)(trace.y[i] * zoom) - zoom / 100,
-                   (2 * zoom) / 100,
-                   (2 * zoom) / 100);
+        if(i == trace.selectedVertex)
+        {
+          g.fillRect(ox + (int)(trace.x[i] * zoom) - 2 * zoom / 100,
+                     oy + (int)(trace.y[i] * zoom) - 2 * zoom / 100,
+                     (4 * zoom) / 100,
+                     (4 * zoom) / 100);
+        }
+        else
+        {
+          g.fillRect(ox + (int)(trace.x[i] * zoom) - zoom / 100,
+                     oy + (int)(trace.y[i] * zoom) - zoom / 100,
+                     (2 * zoom) / 100,
+                     (2 * zoom) / 100);
+        }
       }
     }
   }

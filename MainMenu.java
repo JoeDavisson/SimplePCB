@@ -34,6 +34,26 @@ public class MainMenu extends JMenuBar
     // Edit menu
     JMenu editMenu = new JMenu("Edit");
 
+    JMenuItem traceSizeItem = new JMenuItem("Trace Size...");
+    traceSizeItem.addActionListener(
+      new ActionListener()
+      {
+        public void actionPerformed(ActionEvent e)
+        {
+          new TraceSizeDialog(simplepcb, simplepcb.win);
+        }
+      } );
+
+    JMenuItem padSizeItem = new JMenuItem("Pad Size...");
+    padSizeItem.addActionListener(
+      new ActionListener()
+      {
+        public void actionPerformed(ActionEvent e)
+        {
+          new PadSizeDialog(simplepcb, simplepcb.win);
+        }
+      } );
+
     JMenuItem groupItem = new JMenuItem("Group");
     groupItem.addActionListener(
       new ActionListener()
@@ -52,6 +72,8 @@ public class MainMenu extends JMenuBar
         }
       } );
 
+    editMenu.add(padSizeItem);
+    editMenu.add(traceSizeItem);
     editMenu.add(groupItem);
     editMenu.add(ungroupItem);
 

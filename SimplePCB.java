@@ -184,11 +184,55 @@ public class SimplePCB
         if(simplepcb.input.button3)
         {
           simplepcb.input.button3 = false;
+          simplepcb.selectedTrace = simplepcb.currentTrace;
           simplepcb.currentTrace = null;
           simplepcb.panel.repaint();
         }
 
         continue;
+      }
+
+      // double click
+      if(simplepcb.input.doubleclicked)
+      {
+        simplepcb.input.doubleclicked = false;
+
+        switch(simplepcb.tools.mode)
+        {
+          case 1:
+            // add vertex
+            if(simplepcb.selectedTrace != null)
+            {
+              for(i = 1; i < simplepcb.selectedTrace.length; i++)
+              {
+                double x1 = simplepcb.selectedTrace.x[i];
+                double x2 = simplepcb.selectedTrace.x[i - 1];
+                double y1 = simplepcb.selectedTrace.y[i];
+                double y2 = simplepcb.selectedTrace.y[i - 1];
+
+                boolean pointOnLine = true;
+
+                double crossProduct = (y - y1) * (x2 - x1) - (x - x1) * (y2 - y1);
+                 if(Math.abs(crossProduct) > simplepcb.selectedTrace.size)
+                  pointOnLine = false;
+                double dotProduct = (x - x1) * (x2 - x1) + (y - y1) * (y2 - y1);
+                if(dotProduct < 0)
+                  pointOnLine = false;
+                double squaredLength = (x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1);
+                if(dotProduct > squaredLength)
+                  pointOnLine = false;
+
+                if(pointOnLine)
+                {
+                  simplepcb.selectedTrace.insert(i, gridx, gridy);
+                  simplepcb.selectedTrace.selectedVertex = i;
+                  simplepcb.panel.repaint();
+                  break;
+                }
+              }
+            }
+            break;
+        }
       }
 
       // left button tool
@@ -237,8 +281,8 @@ public class SimplePCB
             for(i = 0; i < simplepcb.board.max; i++)
             {
               if( simplepcb.board.pad[i].status &&
-                  (Math.abs(x - simplepcb.board.pad[i].x) < simplepcb.board.pad[i].outerSize) &&
-                  (Math.abs(y - simplepcb.board.pad[i].y) < simplepcb.board.pad[i].outerSize) )
+                  (Math.abs(x - simplepcb.board.pad[i].x) < simplepcb.board.pad[i].outerSize / 2) &&
+                  (Math.abs(y - simplepcb.board.pad[i].y) < simplepcb.board.pad[i].outerSize / 2) )
               {
                 simplepcb.selectedPad = simplepcb.board.pad[i];
                 simplepcb.selectedTrace = null;
@@ -318,8 +362,8 @@ public class SimplePCB
             if(simplepcb.selectedPad != null)
             {
               if( simplepcb.selectedPad.status &&
-                  (Math.abs(x - simplepcb.selectedPad.x) < simplepcb.selectedPad.outerSize) &&
-                  (Math.abs(y - simplepcb.selectedPad.y) < simplepcb.selectedPad.outerSize) )
+                  (Math.abs(x - simplepcb.selectedPad.x) < simplepcb.selectedPad.outerSize / 2) &&
+                  (Math.abs(y - simplepcb.selectedPad.y) < simplepcb.selectedPad.outerSize / 2) )
               {
                 while(simplepcb.input.button1)
                 {
@@ -345,7 +389,7 @@ public class SimplePCB
             }
             break;
           case 1:
-            // move trace segments
+            // edit trace
             int use = -1;
 
             if(simplepcb.selectedTrace != null)
@@ -355,6 +399,8 @@ public class SimplePCB
                 if( (Math.abs(x - simplepcb.selectedTrace.x[i]) < .05) &&
                     (Math.abs(y - simplepcb.selectedTrace.y[i]) < .05) )
                 {
+                  simplepcb.selectedTrace.selectedVertex = i;
+
                   while(simplepcb.input.button1)
                   {
                     mousex = simplepcb.input.mousex;

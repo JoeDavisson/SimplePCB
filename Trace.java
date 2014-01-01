@@ -6,6 +6,7 @@ public class Trace
   double size;
   boolean status = false;
   int layer;
+  int selectedVertex = 0;
 
   Trace(double temp_size, int temp_layer)
   {
@@ -15,6 +16,7 @@ public class Trace
     size = temp_size;
     status = false;
     layer = temp_layer;
+    selectedVertex = 0;
   }
 
   public void copy(Trace trace)
@@ -31,6 +33,7 @@ public class Trace
     size = trace.size;
     status = trace.status;
     layer = trace.layer;
+    selectedVertex = trace.selectedVertex;
   }
 
   public void add(double temp_x, double temp_y)
@@ -38,6 +41,26 @@ public class Trace
     x[length] = temp_x;
     y[length] = temp_y;
     length++;
+    if(length > 64)
+      length = 64;
+  }
+
+  public void insert(int pos, double temp_x, double temp_y)
+  {
+    int i;
+
+    length++;
+    if(length > 64)
+      length = 64;
+
+    for(i = length - 1; i >= pos; i--)
+    {
+      x[i] = x[i - 1]; 
+      y[i] = y[i - 1]; 
+    }
+
+    x[pos] = temp_x;
+    y[pos] = temp_y;
   }
 }
 
