@@ -34,8 +34,8 @@ public class SimplePCB
   RenderPanel panel = null;
   boolean applet = false;
 
-  double traceSize = .03125;
-  double padInnerSize = .03125;
+  double traceSize = .02;
+  double padInnerSize = .03;
   double padOuterSize = .08;
 
   int offsetx = 0;
@@ -94,13 +94,50 @@ public class SimplePCB
     frame.add(simplepcb.layers, BorderLayout.EAST);
 
     simplepcb.panel = new RenderPanel(simplepcb);
-    frame.add(simplepcb.panel, BorderLayout.CENTER);
 
-    simplepcb.panel.setFocusable(true);
-    simplepcb.panel.addKeyListener(simplepcb.input);
     simplepcb.panel.addMouseListener(simplepcb.input);
     simplepcb.panel.addMouseMotionListener(simplepcb.input);
     simplepcb.panel.addMouseWheelListener(simplepcb.input);
+    //simplepcb.panel.addKeyListener(simplepcb.input);
+    simplepcb.panel.setFocusable(true);
+
+    simplepcb.panel.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0), "key_delete");
+    simplepcb.panel.getActionMap().put("key_delete",
+      new AbstractAction()
+      {
+        @Override
+        public void actionPerformed(ActionEvent e)
+        {
+System.out.println("got here");
+          switch(simplepcb.tools.mode)
+          {
+            case 0:
+              // delete trace
+              if(simplepcb.selectedTrace != null)
+              {
+                simplepcb.selectedTrace.status = false;
+                simplepcb.selectedTrace.length = 0;
+              }
+              // delete pad
+              if(simplepcb.selectedPad != null)
+              {
+                simplepcb.selectedPad.status = false;
+              }
+              break;
+            case 1:
+              // delete vertex
+              if(simplepcb.selectedTrace != null)
+              {
+                simplepcb.selectedTrace.delete(simplepcb.selectedTrace.selectedVertex);
+              }
+              break;
+          }
+
+          simplepcb.panel.repaint();
+        }
+      } );
+
+    frame.add(simplepcb.panel, BorderLayout.CENTER);
 
     frame.pack();
     frame.setVisible(true);
@@ -117,10 +154,10 @@ public class SimplePCB
       int ox = simplepcb.offsetx;
       int oy = simplepcb.offsety;
       int zoom = simplepcb.zoom;
-      double x = (double)(mousex - ox) / zoom + .025;
-      double y = (double)(mousey - oy) / zoom + .025;
-      double gridx = (float)((int)(x * 20)) / 20;
-      double gridy = (float)((int)(y * 20)) / 20;
+      double x = (double)(mousex - ox) / zoom;
+      double y = (double)(mousey - oy) / zoom;
+      double gridx = (float)((int)((x + .025) * 20)) / 20;
+      double gridy = (float)((int)((y + .025) * 20)) / 20;
 
       // zoom in
       if(simplepcb.input.wheelup)
@@ -184,7 +221,19 @@ public class SimplePCB
         if(simplepcb.input.button3)
         {
           simplepcb.input.button3 = false;
-          simplepcb.selectedTrace = simplepcb.currentTrace;
+
+          // turn completed trace off if no length
+          if(simplepcb.currentTrace.length < 2)
+          {
+            simplepcb.currentTrace.length = 0;
+            simplepcb.currentTrace.status = false;
+            simplepcb.selectedTrace = null;
+          }
+          else
+          {
+            simplepcb.selectedTrace = simplepcb.currentTrace;
+          }
+
           simplepcb.currentTrace = null;
           simplepcb.panel.repaint();
         }
@@ -280,9 +329,11 @@ public class SimplePCB
 
             for(i = 0; i < simplepcb.board.max; i++)
             {
-              if( simplepcb.board.pad[i].status &&
-                  (Math.abs(x - simplepcb.board.pad[i].x) < simplepcb.board.pad[i].outerSize / 2) &&
-                  (Math.abs(y - simplepcb.board.pad[i].y) < simplepcb.board.pad[i].outerSize / 2) )
+              double px = x - simplepcb.board.pad[i].x;
+              double py = y - simplepcb.board.pad[i].y;
+              double pr = simplepcb.board.pad[i].outerSize / 2;
+              
+              if(simplepcb.board.pad[i].status && (px * px + py * py < pr * pr))
               {
                 simplepcb.selectedPad = simplepcb.board.pad[i];
                 simplepcb.selectedTrace = null;
@@ -338,10 +389,10 @@ public class SimplePCB
                   ox = simplepcb.offsetx;
                   oy = simplepcb.offsety;
                   zoom = simplepcb.zoom;
-                  x = (double)(mousex - ox) / zoom + .025;
-                  y = (double)(mousey - oy) / zoom + .025;
-                  gridx = (float)((int)(x * 20)) / 20;
-                  gridy = (float)((int)(y * 20)) / 20;
+                  x = (double)(mousex - ox) / zoom;
+                  y = (double)(mousey - oy) / zoom;
+                  gridx = (float)((int)((x + .025) * 20)) / 20;
+                  gridy = (float)((int)((y + .025) * 20)) / 20;
 
                   double deltax = gridx - oldgridx;
                   double deltay = gridy - oldgridy;
@@ -361,9 +412,11 @@ public class SimplePCB
             // move pad
             if(simplepcb.selectedPad != null)
             {
-              if( simplepcb.selectedPad.status &&
-                  (Math.abs(x - simplepcb.selectedPad.x) < simplepcb.selectedPad.outerSize / 2) &&
-                  (Math.abs(y - simplepcb.selectedPad.y) < simplepcb.selectedPad.outerSize / 2) )
+              double px = x - simplepcb.selectedPad.x;
+              double py = y - simplepcb.selectedPad.y;
+              double pr = simplepcb.selectedPad.outerSize / 2;
+              
+              if(simplepcb.selectedPad.status && (px * px + py * py < pr * pr))
               {
                 while(simplepcb.input.button1)
                 {
@@ -372,10 +425,10 @@ public class SimplePCB
                   ox = simplepcb.offsetx;
                   oy = simplepcb.offsety;
                   zoom = simplepcb.zoom;
-                  x = (double)(mousex - ox) / zoom + .025;
-                  y = (double)(mousey - oy) / zoom + .025;
-                  gridx = (float)((int)(x * 20)) / 20;
-                  gridy = (float)((int)(y * 20)) / 20;
+                  x = (double)(mousex - ox) / zoom;
+                  y = (double)(mousey - oy) / zoom;
+                  gridx = (float)((int)((x + .025) * 20)) / 20;
+                  gridy = (float)((int)((y + .025) * 20)) / 20;
 
                   simplepcb.selectedPad.x = gridx;
                   simplepcb.selectedPad.y = gridy;
@@ -408,10 +461,10 @@ public class SimplePCB
                     ox = simplepcb.offsetx;
                     oy = simplepcb.offsety;
                     zoom = simplepcb.zoom;
-                    x = (double)(mousex - ox) / zoom + .025;
-                    y = (double)(mousey - oy) / zoom + .025;
-                    gridx = (float)((int)(x * 20)) / 20;
-                    gridy = (float)((int)(y * 20)) / 20;
+                    x = (double)(mousex - ox) / zoom;
+                    y = (double)(mousey - oy) / zoom;
+                    gridx = (float)((int)((x + .025) * 20)) / 20;
+                    gridy = (float)((int)((y + .025) * 20)) / 20;
 
                     simplepcb.selectedTrace.x[i] = gridx;
                     simplepcb.selectedTrace.y[i] = gridy;

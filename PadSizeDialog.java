@@ -89,9 +89,9 @@ public class PadSizeDialog extends JDialog
             simplepcb.padOuterSize = .25;
           }
 
-          if(simplepcb.padOuterSize < .01)
+          if(simplepcb.padOuterSize < simplepcb.padInnerSize)
           {
-            simplepcb.padOuterSize = .01;
+            simplepcb.padOuterSize = simplepcb.padInnerSize + .02;
           }
 
           dispose();

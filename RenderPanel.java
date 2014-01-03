@@ -37,7 +37,7 @@ public class RenderPanel extends JPanel
                  oy + (int)(trace.y[i - 1] * zoom));
     }
 
-    if(trace == simplepcb.selectedTrace)
+    if(trace == simplepcb.selectedTrace && trace.status)
     {
       g.setColor(Color.WHITE);
       for(i = 0; i < trace.length; i++)
@@ -68,17 +68,17 @@ public class RenderPanel extends JPanel
 
     double xx = pad.x;
     double yy = pad.y;
-    double w1 = pad.outerSize;
-    double w2 = pad.innerSize;
+    double r1 = pad.outerSize / 2;
+    double r2 = pad.innerSize / 2;
 
     if(pad == simplepcb.selectedPad)
       g.setColor(new Color(255, 255, 255));
     else
       g.setColor(color);
 
-    g.fillOval(ox + (int)((xx - w1 / 2) * zoom), oy + (int)((yy - w1 / 2) * zoom), (int)(w1 * zoom), (int)(w1 * zoom));
+    g.fillOval(ox + (int)((xx - r1) * zoom), oy + (int)((yy - r1) * zoom), (int)(r1 * 2 * zoom), (int)(r1 * 2 * zoom));
     g.setColor(new Color(0, 0, 0));
-    g.fillOval(ox + (int)((xx - w2 / 2) * zoom), oy + (int)((yy - w2 / 2) * zoom), (int)(w2 * zoom), (int)(w2 * zoom));
+    g.fillOval(ox + (int)((xx - r2) * zoom), oy + (int)((yy - r2) * zoom), (int)(r2 * 2 * zoom), (int)(r2 * 2 * zoom));
   }
 
   private void draw_board(Graphics2D g, Board board, Color color)
@@ -118,21 +118,24 @@ public class RenderPanel extends JPanel
     int zoom = simplepcb.zoom;
     int ox = simplepcb.offsetx;
     int oy = simplepcb.offsety;
-    double x = (double)(simplepcb.input.mousex - ox) / zoom + .025;
-    double y = (double)(simplepcb.input.mousey - oy) / zoom + .025;
-    x = (float)((int)(x * 20)) / 20;
-    y = (float)((int)(y * 20)) / 20;
+    double x = (double)(simplepcb.input.mousex - ox) / zoom;
+    double y = (double)(simplepcb.input.mousey - oy) / zoom;
+    x = (float)((int)((x + .025) * 20)) / 20;
+    y = (float)((int)((y + .025) * 20)) / 20;
 
     Trace trace = simplepcb.currentTrace;
+    if(trace.status && trace.length > 0)
+    {
 
-    g.setStroke(new BasicStroke((int)(trace.size * zoom),
+      g.setStroke(new BasicStroke((int)(trace.size * zoom),
                                 BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
-    g.setColor(color);
+      g.setColor(color);
 
-    g.drawLine(ox + (int)(trace.x[trace.length - 1] * zoom),
+      g.drawLine(ox + (int)(trace.x[trace.length - 1] * zoom),
                  oy + (int)(trace.y[trace.length - 1] * zoom),
                  ox + (int)(x * zoom),
                  oy + (int)(y * zoom));
+    }
   }
 
   public void paintComponent(Graphics g1)
