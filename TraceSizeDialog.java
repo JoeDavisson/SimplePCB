@@ -31,13 +31,9 @@ public class TraceSizeDialog extends JDialog
   public JButton okButton;
   public JButton cancelButton;
 
-  private SimplePCB simplepcb;
-
-  public TraceSizeDialog(SimplePCB s, Window owner)
+  public TraceSizeDialog(Window owner)
   {
     super(owner, "Trace Size");
-
-    simplepcb = s;
 
     // main window
     setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
@@ -52,7 +48,7 @@ public class TraceSizeDialog extends JDialog
     topPanel.add(new JLabel("Trace Size"));
     traceSizeField = new JTextField(8);
     traceSizeField.setEditable(true);
-    traceSizeField.setText(Double.toString(simplepcb.traceSize));
+    traceSizeField.setText(Double.toString(SimplePCB.traceSize));
     topPanel.add(traceSizeField);
 
     // ok button
@@ -62,16 +58,16 @@ public class TraceSizeDialog extends JDialog
       {
         public void actionPerformed(ActionEvent e)
         {
-          simplepcb.traceSize = Double.parseDouble(traceSizeField.getText());
+          SimplePCB.traceSize = Double.parseDouble(traceSizeField.getText());
 
-          if(simplepcb.traceSize > 1.0)
+          if(SimplePCB.traceSize > 1.0)
           {
-            simplepcb.traceSize = 1.0;
+            SimplePCB.traceSize = 1.0;
           }
 
-          if(simplepcb.traceSize < .01)
+          if(SimplePCB.traceSize < .01)
           {
-            simplepcb.traceSize = .01;
+            SimplePCB.traceSize = .01;
           }
 
           dispose();

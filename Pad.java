@@ -5,6 +5,7 @@ public class Pad
   double innerSize;
   double outerSize;
   boolean status = false;
+  int group = -1;
 
   Pad(double temp_x, double temp_y, double temp_innerSize, double temp_outerSize)
   {

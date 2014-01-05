@@ -7,12 +7,8 @@ import javax.swing.text.*;
 
 public class MainMenu extends JMenuBar
 {
-  public SimplePCB simplepcb;
-
-  public MainMenu(SimplePCB spcb)
+  public MainMenu()
   {
-    simplepcb = spcb;
-
     // file menu
     JMenu fileMenu = new JMenu("File");
 
@@ -23,7 +19,7 @@ public class MainMenu extends JMenuBar
       {
         public void actionPerformed(ActionEvent e)
         {
-          simplepcb.quit();
+          SimplePCB.quit();
         }
       } );
 
@@ -40,7 +36,7 @@ public class MainMenu extends JMenuBar
       {
         public void actionPerformed(ActionEvent e)
         {
-          new TraceSizeDialog(simplepcb, simplepcb.win);
+          new TraceSizeDialog(SimplePCB.win);
         }
       } );
 
@@ -50,7 +46,7 @@ public class MainMenu extends JMenuBar
       {
         public void actionPerformed(ActionEvent e)
         {
-          new PadSizeDialog(simplepcb, simplepcb.win);
+          new PadSizeDialog(SimplePCB.win);
         }
       } );
 
@@ -101,7 +97,7 @@ public class MainMenu extends JMenuBar
       {
         public void actionPerformed(ActionEvent e)
         {
-          simplepcb.about();
+          SimplePCB.about();
         }
       } );
 

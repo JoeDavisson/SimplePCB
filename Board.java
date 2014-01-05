@@ -6,6 +6,9 @@ public class Board
 
   public Trace trace[];
   public Pad pad[];
+  public Group group[];
+
+  int group_count;
 
   Board(double temp_w, double temp_h)
   {
@@ -14,6 +17,8 @@ public class Board
 
     trace = new Trace[max];
     pad = new Pad[max];
+    group = new Group[max];
+    group_count = 0;
 
     int i;
 
@@ -71,6 +76,15 @@ public class Board
     trace[use].status = true;
 
     return trace[use];
+  }
+
+  public void addGroup()
+  {
+    group[group_count] = new Group();
+    group_count++;
+
+    if(group_count > max - 1)
+      group_count = max - 1;
   }
 }
 

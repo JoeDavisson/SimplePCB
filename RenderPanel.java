@@ -4,13 +4,9 @@ import javax.swing.*;
 
 public class RenderPanel extends JPanel
 {
-  SimplePCB simplepcb;
-
-  RenderPanel(SimplePCB s)
+  RenderPanel()
   {
     super();
-
-    simplepcb = s;
 
     setSize(640, 480);
     setPreferredSize(new Dimension(640, 480));
@@ -19,9 +15,9 @@ public class RenderPanel extends JPanel
 
   private void draw_trace(Graphics2D g, Trace trace, Color color)
   {
-    int zoom = simplepcb.zoom;
-    int ox = simplepcb.offsetx;
-    int oy = simplepcb.offsety;
+    int zoom = SimplePCB.zoom;
+    int ox = SimplePCB.offsetx;
+    int oy = SimplePCB.offsety;
 
     g.setStroke(new BasicStroke((int)(trace.size * zoom),
                                 BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
@@ -37,7 +33,7 @@ public class RenderPanel extends JPanel
                  oy + (int)(trace.y[i - 1] * zoom));
     }
 
-    if(trace == simplepcb.selectedTrace && trace.status)
+    if(trace == SimplePCB.selectedTrace && trace.status)
     {
       g.setColor(Color.WHITE);
       for(i = 0; i < trace.length; i++)
@@ -62,16 +58,16 @@ public class RenderPanel extends JPanel
 
   private void draw_pad(Graphics2D g, Pad pad, Color color)
   {
-    int zoom = simplepcb.zoom;
-    int ox = simplepcb.offsetx;
-    int oy = simplepcb.offsety;
+    int zoom = SimplePCB.zoom;
+    int ox = SimplePCB.offsetx;
+    int oy = SimplePCB.offsety;
 
     double xx = pad.x;
     double yy = pad.y;
     double r1 = pad.outerSize / 2;
     double r2 = pad.innerSize / 2;
 
-    if(pad == simplepcb.selectedPad)
+    if(pad == SimplePCB.selectedPad)
       g.setColor(new Color(255, 255, 255));
     else
       g.setColor(color);
@@ -83,9 +79,9 @@ public class RenderPanel extends JPanel
 
   private void draw_board(Graphics2D g, Board board, Color color)
   {
-    int zoom = simplepcb.zoom;
-    int ox = simplepcb.offsetx;
-    int oy = simplepcb.offsety;
+    int zoom = SimplePCB.zoom;
+    int ox = SimplePCB.offsetx;
+    int oy = SimplePCB.offsety;
 
     g.setStroke(new BasicStroke(2));
     g.setColor(color);
@@ -94,9 +90,9 @@ public class RenderPanel extends JPanel
  
   private void draw_grid(Graphics2D g, int w, int h, Color color)
   {
-    int zoom = simplepcb.zoom;
-    int ox = simplepcb.offsetx;
-    int oy = simplepcb.offsety;
+    int zoom = SimplePCB.zoom;
+    int ox = SimplePCB.offsetx;
+    int oy = SimplePCB.offsety;
     w = ((w + zoom) / zoom) * zoom;
     h = ((h + zoom) / zoom) * zoom;
     int fix = zoom * 100;
@@ -115,15 +111,15 @@ public class RenderPanel extends JPanel
 
   public void draw_segment_preview(Graphics2D g, Color color)
   {
-    int zoom = simplepcb.zoom;
-    int ox = simplepcb.offsetx;
-    int oy = simplepcb.offsety;
-    double x = (double)(simplepcb.input.mousex - ox) / zoom;
-    double y = (double)(simplepcb.input.mousey - oy) / zoom;
+    int zoom = SimplePCB.zoom;
+    int ox = SimplePCB.offsetx;
+    int oy = SimplePCB.offsety;
+    double x = (double)(SimplePCB.input.mousex - ox) / zoom;
+    double y = (double)(SimplePCB.input.mousey - oy) / zoom;
     x = (float)((int)((x + .025) * 20)) / 20;
     y = (float)((int)((y + .025) * 20)) / 20;
 
-    Trace trace = simplepcb.currentTrace;
+    Trace trace = SimplePCB.currentTrace;
     if(trace.status && trace.length > 0)
     {
 
@@ -156,10 +152,10 @@ public class RenderPanel extends JPanel
     draw_grid(g, w, h, new Color(64, 64, 64));
 
     // render board
-    draw_board(g, simplepcb.board, new Color(255, 255, 0));
+    draw_board(g, SimplePCB.board, new Color(255, 255, 0));
 
     int i;
-    Board board = simplepcb.board;
+    Board board = SimplePCB.board;
 
     // green traces
     for(i = 0; i < board.max; i++)
@@ -189,7 +185,7 @@ public class RenderPanel extends JPanel
         draw_trace(g, board.trace[i], new Color(255, 255, 0));
     }
 
-    if(simplepcb.currentTrace != null)
+    if(SimplePCB.currentTrace != null)
     {
       draw_segment_preview(g, new Color(128, 255, 128));  
     }

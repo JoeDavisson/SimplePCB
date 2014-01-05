@@ -18,6 +18,7 @@ public class Input implements KeyListener, MouseListener, MouseMotionListener, M
   public boolean wheelup;
   public boolean wheeldown;
   public boolean keydown;
+  public boolean shiftdown;
   public int lastkey = 0;
 
   private boolean initialized = false;
@@ -44,6 +45,7 @@ public class Input implements KeyListener, MouseListener, MouseMotionListener, M
     wheelup = false;
     wheeldown = false;
     keydown = false;
+    shiftdown = false;
     lastkey = 0;
 
     // initialization complete
@@ -120,6 +122,12 @@ public class Input implements KeyListener, MouseListener, MouseMotionListener, M
   {
     if(e.getButton() == MouseEvent.BUTTON1 && e.getClickCount() == 2)
       doubleclicked = true;
+
+    if((e.getModifiersEx() & InputEvent.SHIFT_DOWN_MASK) == InputEvent.SHIFT_DOWN_MASK)
+    {
+System.out.println("shifted");
+      shiftdown = true;
+    }
   }
 
   // mouseMotionListener

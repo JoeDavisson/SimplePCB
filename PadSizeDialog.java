@@ -32,13 +32,9 @@ public class PadSizeDialog extends JDialog
   public JButton okButton;
   public JButton cancelButton;
 
-  private SimplePCB simplepcb;
-
-  public PadSizeDialog(SimplePCB s, Window owner)
+  public PadSizeDialog(Window owner)
   {
     super(owner, "Pad Size");
-
-    simplepcb = s;
 
     // main window
     setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
@@ -53,14 +49,14 @@ public class PadSizeDialog extends JDialog
     topPanel.add(new JLabel("Inner Size"));
     padInnerSizeField = new JTextField(8);
     padInnerSizeField.setEditable(true);
-    padInnerSizeField.setText(Double.toString(simplepcb.padInnerSize));
+    padInnerSizeField.setText(Double.toString(SimplePCB.padInnerSize));
     topPanel.add(padInnerSizeField);
 
     // pad outer size
     topPanel.add(new JLabel("Outer Size"));
     padOuterSizeField = new JTextField(8);
     padOuterSizeField.setEditable(true);
-    padOuterSizeField.setText(Double.toString(simplepcb.padOuterSize));
+    padOuterSizeField.setText(Double.toString(SimplePCB.padOuterSize));
     topPanel.add(padOuterSizeField);
 
     // ok button
@@ -70,28 +66,28 @@ public class PadSizeDialog extends JDialog
       {
         public void actionPerformed(ActionEvent e)
         {
-          simplepcb.padInnerSize = Double.parseDouble(padInnerSizeField.getText());
+          SimplePCB.padInnerSize = Double.parseDouble(padInnerSizeField.getText());
 
-          if(simplepcb.padInnerSize > .25)
+          if(SimplePCB.padInnerSize > .25)
           {
-            simplepcb.padInnerSize = .25;
+            SimplePCB.padInnerSize = .25;
           }
 
-          if(simplepcb.padInnerSize < .01)
+          if(SimplePCB.padInnerSize < .01)
           {
-            simplepcb.padInnerSize = .01;
+            SimplePCB.padInnerSize = .01;
           }
 
-          simplepcb.padOuterSize = Double.parseDouble(padOuterSizeField.getText());
+          SimplePCB.padOuterSize = Double.parseDouble(padOuterSizeField.getText());
 
-          if(simplepcb.padOuterSize > .25)
+          if(SimplePCB.padOuterSize > .25)
           {
-            simplepcb.padOuterSize = .25;
+            SimplePCB.padOuterSize = .25;
           }
 
-          if(simplepcb.padOuterSize < simplepcb.padInnerSize)
+          if(SimplePCB.padOuterSize < SimplePCB.padInnerSize)
           {
-            simplepcb.padOuterSize = simplepcb.padInnerSize + .02;
+            SimplePCB.padOuterSize = SimplePCB.padInnerSize + .02;
           }
 
           dispose();
