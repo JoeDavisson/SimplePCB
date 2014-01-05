@@ -346,6 +346,8 @@ public class SimplePCB
         switch(tools.mode)
         {
           case 0:
+            unselectAll();
+
             // select trace
             for(i = 0; i < board.max; i++)
             {
@@ -477,6 +479,7 @@ public class SimplePCB
             // new trace
             if(currentTrace == null)
             {
+              unselectAll();
               // add first segment
               currentTrace = board.addTrace(gridx, gridy, traceSize, layers.current);
               panel.repaint();
