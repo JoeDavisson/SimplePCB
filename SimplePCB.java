@@ -125,6 +125,14 @@ public class SimplePCB
      return false;
   }
 
+  // unselect all
+  public static void unselectAll()
+  {
+    currentTrace = null;
+    selectedTrace = null;
+    selectedPad = null;
+  }
+
   // program entry
   public static void main(String[] args)
   {
@@ -223,8 +231,8 @@ public class SimplePCB
         input.wheelup = false;
         zoom += 100;
 
-        if(zoom > (100 * 32))
-          zoom = (100 * 32);
+        if(zoom > (100 * 8))
+          zoom = (100 * 8);
 
         panel.repaint();
         continue;
@@ -273,6 +281,8 @@ public class SimplePCB
           input.button1 = false;
           currentTrace.add(gridx, gridy);
           panel.repaint();
+
+          continue;
         } 
 
         // done
@@ -336,7 +346,6 @@ public class SimplePCB
         switch(tools.mode)
         {
           case 0:
-            selectedTrace = null;
             // select trace
             for(i = 0; i < board.max; i++)
             {
@@ -351,6 +360,7 @@ public class SimplePCB
 
                   if(pointOnLine(x, y, x1, y1, x2, y2, board.trace[i].size))
                   {
+                    unselectAll();
                     selectedTrace = board.trace[i];
 
                     double oldgridx = gridx;
@@ -391,8 +401,8 @@ public class SimplePCB
               
               if(board.pad[i].status && pointInCircle(px, py, pr))
               {
+                unselectAll();
                 selectedPad = board.pad[i];
-                selectedTrace = null;
 
                 double oldgridx = gridx;
                 double oldgridy = gridy;
@@ -456,6 +466,7 @@ public class SimplePCB
             }
             break;
           case 2:
+            unselectAll();
             board.addPad(gridx, gridy, padInnerSize, padOuterSize);
             panel.repaint();
 
