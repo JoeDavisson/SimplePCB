@@ -22,6 +22,7 @@ public class Tools extends JToolBar
     select = new JToggleButton();
     select.setToolTipText("Select");
     select.setIcon(getIcon("/data/select.png"));
+    select.setSelected(true);
     select.addActionListener(
       new ActionListener()
       {
@@ -91,6 +92,9 @@ public class Tools extends JToolBar
     add(pad);
     add(trace);
     add(rect);
+
+    // set default tool
+    mode = 0;
   }
 
   private ImageIcon getIcon(String s)

@@ -1,9 +1,13 @@
 import java.awt.*;
+import java.awt.geom.*;
 import java.awt.event.*;
 import javax.swing.*;
 
 public class RenderPanel extends JPanel
 {
+  private int ox, oy;
+  private int zoom;
+
   RenderPanel()
   {
     super();
@@ -15,11 +19,7 @@ public class RenderPanel extends JPanel
 
   private void draw_trace(Graphics2D g, Trace trace, Color color)
   {
-    int zoom = SimplePCB.zoom;
-    int ox = SimplePCB.offsetx;
-    int oy = SimplePCB.offsety;
-
-    g.setStroke(new BasicStroke((int)(trace.size * zoom),
+    g.setStroke(new BasicStroke((float)trace.size * zoom,
                                 BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
     g.setColor(color);
 
@@ -27,30 +27,40 @@ public class RenderPanel extends JPanel
 
     for(i = 1; i < trace.length; i++)
     {
-      g.drawLine(ox + (int)(trace.x[i] * zoom),
-                 oy + (int)(trace.y[i] * zoom),
-                 ox + (int)(trace.x[i - 1] * zoom),
-                 oy + (int)(trace.y[i - 1] * zoom));
+      g.draw(new Line2D.Double(ox + (trace.x[i] * zoom),
+                 oy + (trace.y[i] * zoom),
+                 ox + (trace.x[i - 1] * zoom),
+                 oy + (trace.y[i - 1] * zoom)));
     }
 
     if(trace == SimplePCB.selectedTrace && trace.status)
     {
+      g.setStroke(new BasicStroke((float)2.0));
       g.setColor(Color.WHITE);
+
+      for(i = 1; i < trace.length; i++)
+      {
+        g.draw(new Line2D.Double(ox + (trace.x[i] * zoom),
+                   oy + (trace.y[i] * zoom),
+                   ox + (trace.x[i - 1] * zoom),
+                   oy + (trace.y[i - 1] * zoom)));
+      }
+
       for(i = 0; i < trace.length; i++)
       {
         if(i == trace.selectedVertex)
         {
-          g.fillRect(ox + (int)(trace.x[i] * zoom) - 2 * zoom / 100,
-                     oy + (int)(trace.y[i] * zoom) - 2 * zoom / 100,
-                     (4 * zoom) / 100,
-                     (4 * zoom) / 100);
+          g.fill(new Rectangle2D.Double(ox + (trace.x[i] * zoom) - 1.5 * zoom / 100,
+                     oy + (trace.y[i] * zoom) - 1.5 * zoom / 100,
+                     (3 * zoom) / 100,
+                     (3 * zoom) / 100));
         }
         else
         {
-          g.fillRect(ox + (int)(trace.x[i] * zoom) - zoom / 100,
-                     oy + (int)(trace.y[i] * zoom) - zoom / 100,
+          g.fill(new Rectangle2D.Double(ox + (trace.x[i] * zoom) - zoom / 100,
+                     oy + (trace.y[i] * zoom) - zoom / 100,
                      (2 * zoom) / 100,
-                     (2 * zoom) / 100);
+                     (2 * zoom) / 100));
         }
       }
     }
@@ -58,79 +68,72 @@ public class RenderPanel extends JPanel
 
   private void draw_pad(Graphics2D g, Pad pad, Color color)
   {
-    int zoom = SimplePCB.zoom;
-    int ox = SimplePCB.offsetx;
-    int oy = SimplePCB.offsety;
-
     double xx = pad.x;
     double yy = pad.y;
-    double r1 = pad.outerSize / 2;
-    double r2 = pad.innerSize / 2;
+    double w1 = pad.outerSize;
+    double w2 = pad.innerSize;
 
     if(pad == SimplePCB.selectedPad)
       g.setColor(new Color(255, 255, 255));
     else
       g.setColor(color);
 
-    g.fillOval(ox + (int)((xx - r1) * zoom), oy + (int)((yy - r1) * zoom), (int)(r1 * 2 * zoom), (int)(r1 * 2 * zoom));
+    g.fill(new Ellipse2D.Double(ox + ((xx - w1 / 2.0) * zoom), oy + ((yy - w1 / 2.0) * zoom), (w1 * zoom), (w1 * zoom)));
     g.setColor(new Color(0, 0, 0));
-    g.fillOval(ox + (int)((xx - r2) * zoom), oy + (int)((yy - r2) * zoom), (int)(r2 * 2 * zoom), (int)(r2 * 2 * zoom));
+    g.fill(new Ellipse2D.Double(ox + ((xx - w2 / 2.0) * zoom), oy + ((yy - w2 / 2.0) * zoom), (w2 * zoom), (w2 * zoom)));
   }
 
   private void draw_board(Graphics2D g, Board board, Color color)
   {
-    int zoom = SimplePCB.zoom;
-    int ox = SimplePCB.offsetx;
-    int oy = SimplePCB.offsety;
-
-    g.setStroke(new BasicStroke(2));
+    g.setStroke(new BasicStroke((float)2.0));
     g.setColor(color);
-    g.drawRect(ox, oy, (int)(board.w * zoom), (int)(board.h * zoom));
+    g.draw(new Rectangle2D.Double(ox, oy, (board.w * zoom), (board.h * zoom)));
   }
  
-  private void draw_grid(Graphics2D g, int w, int h, Color color)
+  private void draw_grid(Graphics2D g, int w, int h)
   {
-    int zoom = SimplePCB.zoom;
-    int ox = SimplePCB.offsetx;
-    int oy = SimplePCB.offsety;
+    int x, y;
     w = ((w + zoom) / zoom) * zoom;
     h = ((h + zoom) / zoom) * zoom;
     int fix = zoom * 100;
 
     // draw grid
-    g.setStroke(new BasicStroke(1));
-    g.setColor(color);
+    g.setStroke(new BasicStroke((float)1.0));
+    g.setXORMode(Color.WHITE);
 
-    int x, y;
-
+    g.setColor(new Color(192, 192, 192));
     for(x = 0; x < w; x += zoom / 10)
-      g.drawLine((x + ox + fix) % w, 0, (x + ox + fix) % w, h);
+      g.draw(new Line2D.Double((x + ox + fix) % w, 0, (x + ox + fix) % w, h));
     for(y = 0; y < h; y += zoom / 10)
-      g.drawLine(0, (y + oy + fix) % h, w, (y + oy + fix) % h);
+      g.draw(new Line2D.Double(0, (y + oy + fix) % h, w, (y + oy + fix) % h));
   }
 
   public void draw_segment_preview(Graphics2D g, Color color)
   {
-    int zoom = SimplePCB.zoom;
-    int ox = SimplePCB.offsetx;
-    int oy = SimplePCB.offsety;
-    double x = (double)(SimplePCB.input.mousex - ox) / zoom;
-    double y = (double)(SimplePCB.input.mousey - oy) / zoom;
-    x = (float)((int)((x + .025) * 20)) / 20;
-    y = (float)((int)((y + .025) * 20)) / 20;
+    SimplePCB.updateMouse();
+
+    double x = SimplePCB.x;
+    double y = SimplePCB.y;
+    double gridx = SimplePCB.gridx;
+    double gridy = SimplePCB.gridy;
 
     Trace trace = SimplePCB.currentTrace;
     if(trace.status && trace.length > 0)
     {
-
-      g.setStroke(new BasicStroke((int)(trace.size * zoom),
+      g.setStroke(new BasicStroke((float)(trace.size * zoom),
                                 BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
       g.setColor(color);
+      g.draw(new Line2D.Double(ox + (trace.x[trace.length - 1] * zoom),
+                 oy + (trace.y[trace.length - 1] * zoom),
+                 ox + (gridx * zoom),
+                 oy + (gridy * zoom)));
 
-      g.drawLine(ox + (int)(trace.x[trace.length - 1] * zoom),
-                 oy + (int)(trace.y[trace.length - 1] * zoom),
-                 ox + (int)(x * zoom),
-                 oy + (int)(y * zoom));
+      g.setStroke(new BasicStroke((float)2.0));
+      g.setColor(Color.WHITE);
+      g.draw(new Line2D.Double(ox + (trace.x[trace.length - 1] * zoom),
+                 oy + (trace.y[trace.length - 1] * zoom),
+                 ox + (gridx * zoom),
+                 oy + (gridy * zoom)));
     }
   }
 
@@ -140,16 +143,19 @@ public class RenderPanel extends JPanel
 
     Graphics2D g = (Graphics2D)g1;
     g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+    g.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
 
     Dimension d = getSize();
     int w = d.width;
     int h = d.height;
 
+    ox = SimplePCB.ox;
+    oy = SimplePCB.oy;
+    zoom = SimplePCB.zoom;
+
     // clear
     g.setColor(Color.BLACK);
     g.fillRect(0, 0, w, h);
-
-    draw_grid(g, w, h, new Color(64, 64, 64));
 
     // render board
     draw_board(g, SimplePCB.board, new Color(255, 255, 0));
@@ -187,8 +193,11 @@ public class RenderPanel extends JPanel
 
     if(SimplePCB.currentTrace != null)
     {
-      draw_segment_preview(g, new Color(128, 255, 128));  
+      draw_segment_preview(g, new Color(192, 192, 192));  
     }
+
+    // grid
+    draw_grid(g, w, h);
   }
 }
 

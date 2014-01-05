@@ -29,6 +29,7 @@ import java.net.*;
 public class SimplePCB
 {
   public static Frame win = null;
+  public static TopBar topbar = null;
   public static Tools tools = null;
   public static Layers layers = null;
   public static RenderPanel panel = null;
@@ -36,9 +37,6 @@ public class SimplePCB
   public static double traceSize = .02;
   public static double padInnerSize = .03;
   public static double padOuterSize = .08;
-
-  public static int offsetx = 0;
-  public static int offsety = 0;
 
   public static Input input;
 
@@ -50,20 +48,27 @@ public class SimplePCB
   public static Trace selectedTrace = null;
   //public static Group selectionGroup = null;
 
+  public static int mousex, mousey;
+  public static int ox, oy;
+  public static double x, y;
+  public static double gridx, gridy;
+
+  // about dialog
   public static void about()
   {
     JOptionPane.showMessageDialog(win, "SimplePCB",
       "About", JOptionPane.INFORMATION_MESSAGE);
   }
 
+  // quit
   public static void quit() 
   {
     System.exit(0);
   }
 
+  // sleep
   private static void sleep()
   {
-    // sleep
     try
     {
       Thread.sleep(50);
@@ -73,29 +78,88 @@ public class SimplePCB
     }
   }
 
+  // mouse related math
+  public static void updateMouse()
+  {
+    mousex = input.mousex;
+    mousey = input.mousey;
+    x = (double)(mousex - ox) / zoom;
+    y = (double)(mousey - oy) / zoom;
+    gridx = (float)((int)((x + .0125) * 40)) / 40;
+    gridy = (float)((int)((y + .0125) * 40)) / 40;
+  }
+
+  // point on line test
+  public static boolean pointOnLine(double x, double y, double x1, double y1, double x2, double y2, double size)
+  {
+    double px = x2 - x1;
+    double py = y2 - y1;
+
+    double len = px * px + py * py;
+
+    double u = ((x - x1) * px + (y - y1) * py) / len;
+
+    if(u > 1.0)
+      u = 1.0;
+    if(u < 0)
+      u = 0;
+
+    double x3 = x1 + u * px;
+    double y3 = y1 + u * py;
+
+    double dx = x3 - x;
+    double dy = y3 - y;
+
+    if(Math.sqrt(dx * dx + dy * dy) < size / 2)
+      return true;
+    else
+      return false;
+  }
+
+  // point in circle test
+  public static boolean pointInCircle(double x, double y, double r)
+  {
+    if(x * x + y * y < r * r)
+      return true;
+    else
+     return false;
+  }
+
+  // program entry
   public static void main(String[] args)
   {
+    // mouse input
     input = new Input();
 
+    // pcb board outline
     board = new Board(6.0, 4.0);
 
     // create window
     JFrame frame = new JFrame("SimplePCB");
     frame.setLayout(new BorderLayout());
     frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-    frame.setPreferredSize(new Dimension(640, 480));
-    frame.setMinimumSize(new Dimension(640, 480));
+    frame.setPreferredSize(new Dimension(800, 600));
+    frame.setMinimumSize(new Dimension(800, 600));
     frame.setResizable(true);
     frame.setFocusable(true);
+
+    // menu
     MainMenu menu = new MainMenu();
     frame.setJMenuBar(menu);
 
+    // top toolbar
+    topbar = new TopBar(); 
+    frame.add(topbar, BorderLayout.NORTH);
+
+    // left toolbar
     tools = new Tools(); 
     frame.add(tools, BorderLayout.WEST);
 
+    // right toolbar
     layers = new Layers(); 
     frame.add(layers, BorderLayout.EAST);
 
+    // main viewport
     panel = new RenderPanel();
 
     panel.addMouseListener(input);
@@ -104,14 +168,13 @@ public class SimplePCB
     //panel.addKeyListener(input);
     panel.setFocusable(true);
 
+    // key bindings
     panel.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0), "key_delete");
     panel.getActionMap().put("key_delete",
       new AbstractAction()
       {
-        @Override
         public void actionPerformed(ActionEvent e)
         {
-System.out.println("got here");
           switch(tools.mode)
           {
             case 0:
@@ -146,20 +209,13 @@ System.out.println("got here");
     frame.setVisible(true);
     win = (Frame)frame;
 
-    currentTrace = null;
-
     int i, j;
 
+    // main loop
     while(true)
     {
-      int mousex = input.mousex;
-      int mousey = input.mousey;
-      int ox = offsetx;
-      int oy = offsety;
-      double x = (double)(mousex - ox) / zoom;
-      double y = (double)(mousey - oy) / zoom;
-      double gridx = (float)((int)((x + .025) * 20)) / 20;
-      double gridy = (float)((int)((y + .025) * 20)) / 20;
+      sleep();
+      updateMouse();
 
       // zoom in
       if(input.wheelup)
@@ -167,10 +223,10 @@ System.out.println("got here");
         input.wheelup = false;
         zoom += 100;
 
-        if(zoom > (100 * 8))
-          zoom = (100 * 8);
-        panel.repaint();
+        if(zoom > (100 * 32))
+          zoom = (100 * 32);
 
+        panel.repaint();
         continue;
       }
 
@@ -182,21 +238,21 @@ System.out.println("got here");
 
         if(zoom < 100)
           zoom = 100;
-        panel.repaint();
 
+        panel.repaint();
         continue;
       }
 
       // pan view
       if(input.button2)
       {
-        int last_offsetx = mousex - ox;
-        int last_offsety = mousey - oy;
+        int last_ox = mousex - ox;
+        int last_oy = mousey - oy;
 
         while(input.button2)
         {
-          offsetx = input.mousex - last_offsetx;
-          offsety = input.mousey - last_offsety;
+          ox = input.mousex - last_ox;
+          oy = input.mousey - last_oy;
 
           panel.repaint();
 
@@ -246,8 +302,6 @@ System.out.println("got here");
       // double click
       if(input.doubleclicked)
       {
-        input.doubleclicked = false;
-
         switch(tools.mode)
         {
           case 1:
@@ -261,19 +315,7 @@ System.out.println("got here");
                 double y1 = selectedTrace.y[i];
                 double y2 = selectedTrace.y[i - 1];
 
-                boolean pointOnLine = true;
-
-                double crossProduct = (y - y1) * (x2 - x1) - (x - x1) * (y2 - y1);
-                 if(Math.abs(crossProduct) > selectedTrace.size)
-                  pointOnLine = false;
-                double dotProduct = (x - x1) * (x2 - x1) + (y - y1) * (y2 - y1);
-                if(dotProduct < 0)
-                  pointOnLine = false;
-                double squaredLength = (x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1);
-                if(dotProduct > squaredLength)
-                  pointOnLine = false;
-
-                if(pointOnLine)
+                if(pointOnLine(x, y, x1, y1, x2, y2, selectedTrace.size))
                 {
                   selectedTrace.insert(i, gridx, gridy);
                   selectedTrace.selectedVertex = i;
@@ -284,17 +326,18 @@ System.out.println("got here");
             }
             break;
         }
+
+        input.doubleclicked = false;
       }
 
-      // left button tool
+      // left button click
       if(input.button1)
       {
         switch(tools.mode)
         {
           case 0:
-            // select trace
             selectedTrace = null;
-
+            // select trace
             for(i = 0; i < board.max; i++)
             {
               if(board.trace[i].status)
@@ -306,20 +349,32 @@ System.out.println("got here");
                   double y1 = board.trace[i].y[j];
                   double y2 = board.trace[i].y[j - 1];
 
-                  boolean pointOnLine = true;
-                  double crossProduct = (y - y1) * (x2 - x1) - (x - x1) * (y2 - y1);
-                  if(Math.abs(crossProduct) > board.trace[i].size)
-                    pointOnLine = false;
-                  double dotProduct = (x - x1) * (x2 - x1) + (y - y1) * (y2 - y1);
-                  if(dotProduct < 0)
-                    pointOnLine = false;
-                  double squaredLength = (x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1);
-                  if(dotProduct > squaredLength)
-                    pointOnLine = false;
-
-                  if(pointOnLine)
+                  if(pointOnLine(x, y, x1, y1, x2, y2, board.trace[i].size))
                   {
                     selectedTrace = board.trace[i];
+
+                    double oldgridx = gridx;
+                    double oldgridy = gridy;
+         
+                    Trace tempTrace = new Trace(0, 0);
+                    tempTrace.copy(selectedTrace);
+
+                    while(input.button1)
+                    {
+                      updateMouse();
+
+                      double deltax = gridx - oldgridx;
+                      double deltay = gridy - oldgridy;
+
+                      for(i = 0; i < selectedTrace.length; i++)
+                      {
+                        selectedTrace.x[i] = tempTrace.x[i] + deltax;
+                        selectedTrace.y[i] = tempTrace.y[i] + deltay;
+                      }
+
+                      panel.repaint();
+                      sleep();
+                    }
                     break;
                   }
                 }
@@ -328,128 +383,39 @@ System.out.println("got here");
 
             // select pad
             selectedPad = null;
-
             for(i = 0; i < board.max; i++)
             {
               double px = x - board.pad[i].x;
               double py = y - board.pad[i].y;
               double pr = board.pad[i].outerSize / 2;
               
-              if(board.pad[i].status && (px * px + py * py < pr * pr))
+              if(board.pad[i].status && pointInCircle(px, py, pr))
               {
                 selectedPad = board.pad[i];
                 selectedTrace = null;
-                break;
-              }
-            }
 
-            // add to group
-/*
-            if(input.shifted)
-            {
-              if(selectedTrace != null)
-                selectedTrace.group = currentGroup;
-
-              if(selectedPad != null)
-                selectedPad.group = currentPad;
-
-              break;
-            }
-*/
-
-            // move trace
-            if(selectedTrace != null)
-            {
-              boolean move_trace = false;
-
-              for(i = 1; i < selectedTrace.length; i++)
-              {
-                double x1 = selectedTrace.x[i];
-                double x2 = selectedTrace.x[i - 1];
-                double y1 = selectedTrace.y[i];
-                double y2 = selectedTrace.y[i - 1];
-
-                boolean pointOnLine = true;
-
-                double crossProduct = (y - y1) * (x2 - x1) - (x - x1) * (y2 - y1);
-                 if(Math.abs(crossProduct) > selectedTrace.size)
-                  pointOnLine = false;
-                double dotProduct = (x - x1) * (x2 - x1) + (y - y1) * (y2 - y1);
-                if(dotProduct < 0)
-                  pointOnLine = false;
-                double squaredLength = (x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1);
-                if(dotProduct > squaredLength)
-                  pointOnLine = false;
-
-                if(pointOnLine)
-                {
-                  move_trace = true;
-                  break;
-                }
-              }
-
-              if(move_trace)
-              {
                 double oldgridx = gridx;
                 double oldgridy = gridy;
          
-                Trace tempTrace = new Trace(0, 0);
-                tempTrace.copy(selectedTrace);
+                Pad tempPad = new Pad(0, 0, 0, 0);
+                tempPad.copy(selectedPad);
 
                 while(input.button1)
                 {
-                  mousex = input.mousex;
-                  mousey = input.mousey;
-                  ox = offsetx;
-                  oy = offsety;
-                  x = (double)(mousex - ox) / zoom;
-                  y = (double)(mousey - oy) / zoom;
-                  gridx = (float)((int)((x + .025) * 20)) / 20;
-                  gridy = (float)((int)((y + .025) * 20)) / 20;
+                  updateMouse();
 
                   double deltax = gridx - oldgridx;
                   double deltay = gridy - oldgridy;
 
-                  for(i = 0; i < selectedTrace.length; i++)
-                  {
-                    selectedTrace.x[i] = tempTrace.x[i] + deltax;
-                    selectedTrace.y[i] = tempTrace.y[i] + deltay;
-                  }
-
-                  panel.repaint();
-                  sleep();
-                }
-              }
-            }
-
-            // move pad
-            if(selectedPad != null)
-            {
-              double px = x - selectedPad.x;
-              double py = y - selectedPad.y;
-              double pr = selectedPad.outerSize / 2;
-              
-              if(selectedPad.status && (px * px + py * py < pr * pr))
-              {
-                while(input.button1)
-                {
-                  mousex = input.mousex;
-                  mousey = input.mousey;
-                  ox = offsetx;
-                  oy = offsety;
-                  x = (double)(mousex - ox) / zoom;
-                  y = (double)(mousey - oy) / zoom;
-                  gridx = (float)((int)((x + .025) * 20)) / 20;
-                  gridy = (float)((int)((y + .025) * 20)) / 20;
-
-                  selectedPad.x = gridx;
-                  selectedPad.y = gridy;
+                  selectedPad.x = tempPad.x + deltax;
+                  selectedPad.y = tempPad.y + deltay;
 
                   panel.repaint();
                   sleep();
                 }
 
                 panel.repaint();
+                break;
               }
             }
 
@@ -457,43 +423,45 @@ System.out.println("got here");
             break;
           case 1:
             // edit trace
-            int use = -1;
-
             if(selectedTrace != null)
             {
               for(i = 0; i < selectedTrace.length; i++)
               {
-                if( (Math.abs(x - selectedTrace.x[i]) < .05) &&
-                    (Math.abs(y - selectedTrace.y[i]) < .05) )
+                if(pointInCircle(x - selectedTrace.x[i], y - selectedTrace.y[i], 0.025))
                 {
                   selectedTrace.selectedVertex = i;
 
+                  double oldgridx = gridx;
+                  double oldgridy = gridy;
+                  double oldx = selectedTrace.x[i];
+                  double oldy = selectedTrace.y[i];
+         
                   while(input.button1)
                   {
-                    mousex = input.mousex;
-                    mousey = input.mousey;
-                    ox = offsetx;
-                    oy = offsety;
-                    x = (double)(mousex - ox) / zoom;
-                    y = (double)(mousey - oy) / zoom;
-                    gridx = (float)((int)((x + .025) * 20)) / 20;
-                    gridy = (float)((int)((y + .025) * 20)) / 20;
+                    updateMouse();
 
-                    selectedTrace.x[i] = gridx;
-                    selectedTrace.y[i] = gridy;
+                    double deltax = gridx - oldgridx;
+                    double deltay = gridy - oldgridy;
+
+                    selectedTrace.x[i] = oldx + deltax;
+                    selectedTrace.y[i] = oldy + deltay;
 
                     panel.repaint();
                     sleep();
                   }
+                  panel.repaint();
+                  break;
                 }
               }
-              panel.repaint();
             }
             break;
           case 2:
             board.addPad(gridx, gridy, padInnerSize, padOuterSize);
             panel.repaint();
-            break;
+
+            // skip dragging
+            input.button1 = false;
+            continue;
           case 3:
             // new trace
             if(currentTrace == null)
@@ -503,14 +471,11 @@ System.out.println("got here");
               panel.repaint();
             }
             break;
-          case 4:
-            break;
         }
 
+        panel.repaint();
         input.button1 = false;
       }
-
-      sleep();
     }
   }
 }

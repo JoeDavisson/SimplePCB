@@ -10,11 +10,13 @@ public class Input implements KeyListener, MouseListener, MouseMotionListener, M
   // access directly
   public int mousex = 0;
   public int mousey = 0;
+  public boolean moved;
+  public boolean dragged;
   public boolean button1;
   public boolean button2;
   public boolean button3;
+  public boolean clicked;
   public boolean doubleclicked;
-  public boolean dragged;
   public boolean wheelup;
   public boolean wheeldown;
   public boolean keydown;
@@ -25,10 +27,6 @@ public class Input implements KeyListener, MouseListener, MouseMotionListener, M
 
   public Input()
   {
-    // only initialize everything once
-    if(initialized)
-      return;
-
     keyList = new boolean[65536];
 
     int i;
@@ -38,18 +36,18 @@ public class Input implements KeyListener, MouseListener, MouseMotionListener, M
 
     mousex = 0;
     mousey = 0;
+    moved = false;
+    dragged = false;
     button1 = false;
     button2 = false;
     button3 = false;
-    dragged = false;
+    clicked = false;
+    doubleclicked = false;
     wheelup = false;
     wheeldown = false;
     keydown = false;
     shiftdown = false;
     lastkey = 0;
-
-    // initialization complete
-    initialized = true;
   }
 
   public boolean getKey(int num)
@@ -120,12 +118,14 @@ public class Input implements KeyListener, MouseListener, MouseMotionListener, M
 
   public void mouseClicked(MouseEvent e)
   {
+    if(e.getButton() == MouseEvent.BUTTON1 && e.getClickCount() == 1)
+      clicked = true;
+
     if(e.getButton() == MouseEvent.BUTTON1 && e.getClickCount() == 2)
       doubleclicked = true;
 
     if((e.getModifiersEx() & InputEvent.SHIFT_DOWN_MASK) == InputEvent.SHIFT_DOWN_MASK)
     {
-System.out.println("shifted");
       shiftdown = true;
     }
   }
@@ -135,12 +135,22 @@ System.out.println("shifted");
   {
     mousex = e.getX();
     mousey = e.getY();
+
+    moved = true;
   }
 
   public void mouseDragged(MouseEvent e)
   {
-    dragged = true;
+    if(e.getButton() == MouseEvent.BUTTON1)
+      button1 = true;
+    if(e.getButton() == MouseEvent.BUTTON2)
+      button2 = true;
+    if(e.getButton() == MouseEvent.BUTTON3)
+      button3 = true;
+
     mouseMoved(e);
+
+    dragged = true;
   }
 
   // mouseWheelListener

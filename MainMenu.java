@@ -30,7 +30,7 @@ public class MainMenu extends JMenuBar
     // Edit menu
     JMenu editMenu = new JMenu("Edit");
 
-    JMenuItem traceSizeItem = new JMenuItem("Trace Size...");
+    JMenuItem traceSizeItem = new JMenuItem("Custom Trace Size...");
     traceSizeItem.addActionListener(
       new ActionListener()
       {
@@ -40,7 +40,7 @@ public class MainMenu extends JMenuBar
         }
       } );
 
-    JMenuItem padSizeItem = new JMenuItem("Pad Size...");
+    JMenuItem padSizeItem = new JMenuItem("Custom Pad Size...");
     padSizeItem.addActionListener(
       new ActionListener()
       {
@@ -68,14 +68,16 @@ public class MainMenu extends JMenuBar
         }
       } );
 
-    editMenu.add(padSizeItem);
-    editMenu.add(traceSizeItem);
     editMenu.add(groupItem);
     editMenu.add(ungroupItem);
+    editMenu.addSeparator();
+    editMenu.add(padSizeItem);
+    editMenu.add(traceSizeItem);
 
     add(editMenu);
 
     // view menu
+/*
     JMenu viewMenu = new JMenu("View");
 
     JCheckBoxMenuItem yellow = new JCheckBoxMenuItem("Graphics", true);
@@ -87,7 +89,7 @@ public class MainMenu extends JMenuBar
     viewMenu.add(green);
 
     add(viewMenu);
-
+*/
     // help menu
     JMenu helpMenu = new JMenu("Help");
 

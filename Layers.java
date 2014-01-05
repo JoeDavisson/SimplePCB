@@ -44,6 +44,7 @@ public class Layers extends JToolBar
     green = new JToggleButton();
     green.setToolTipText("Bottom Traces");
     green.setIcon(getIcon("/data/green.png"));
+    green.setSelected(true);
     green.addActionListener(
       new ActionListener()
       {
@@ -61,6 +62,9 @@ public class Layers extends JToolBar
     add(yellow);
     add(red);
     add(green);
+
+    // set default button to green
+    current = 2;
   }
 
   private ImageIcon getIcon(String s)

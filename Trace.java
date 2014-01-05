@@ -7,7 +7,6 @@ public class Trace
   boolean status = false;
   int layer;
   int selectedVertex = 0;
-  int group = -1;
 
   Trace(double temp_size, int temp_layer)
   {
