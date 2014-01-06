@@ -30,23 +30,21 @@ public class MainMenu extends JMenuBar
     // Edit menu
     JMenu editMenu = new JMenu("Edit");
 
-    JMenuItem traceSizeItem = new JMenuItem("Custom Trace Size...");
-    traceSizeItem.addActionListener(
+    JMenuItem copyItem = new JMenuItem("Copy");
+    copyItem.addActionListener(
       new ActionListener()
       {
         public void actionPerformed(ActionEvent e)
         {
-          new TraceSizeDialog(SimplePCB.win);
         }
       } );
 
-    JMenuItem padSizeItem = new JMenuItem("Custom Pad Size...");
-    padSizeItem.addActionListener(
+    JMenuItem pasteItem = new JMenuItem("Paste");
+    pasteItem.addActionListener(
       new ActionListener()
       {
         public void actionPerformed(ActionEvent e)
         {
-          new PadSizeDialog(SimplePCB.win);
         }
       } );
 
@@ -68,6 +66,29 @@ public class MainMenu extends JMenuBar
         }
       } );
 
+    JMenuItem traceSizeItem = new JMenuItem("Custom Trace Size...");
+    traceSizeItem.addActionListener(
+      new ActionListener()
+      {
+        public void actionPerformed(ActionEvent e)
+        {
+          new TraceSizeDialog(SimplePCB.win);
+        }
+      } );
+
+    JMenuItem padSizeItem = new JMenuItem("Custom Pad Size...");
+    padSizeItem.addActionListener(
+      new ActionListener()
+      {
+        public void actionPerformed(ActionEvent e)
+        {
+          new PadSizeDialog(SimplePCB.win);
+        }
+      } );
+
+    editMenu.add(copyItem);
+    editMenu.add(pasteItem);
+    editMenu.addSeparator();
     editMenu.add(groupItem);
     editMenu.add(ungroupItem);
     editMenu.addSeparator();

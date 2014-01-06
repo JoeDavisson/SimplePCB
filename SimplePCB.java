@@ -305,7 +305,6 @@ public class SimplePCB
           currentTrace = null;
           panel.repaint();
         }
-
         continue;
       }
 
@@ -348,53 +347,9 @@ public class SimplePCB
           case 0:
             unselectAll();
 
-            // select trace
-            for(i = 0; i < board.max; i++)
-            {
-              if(board.trace[i].status)
-              {
-                for(j = 1; j < board.trace[i].length; j++)
-                {
-                  double x1 = board.trace[i].x[j];
-                  double x2 = board.trace[i].x[j - 1];
-                  double y1 = board.trace[i].y[j];
-                  double y2 = board.trace[i].y[j - 1];
-
-                  if(pointOnLine(x, y, x1, y1, x2, y2, board.trace[i].size))
-                  {
-                    unselectAll();
-                    selectedTrace = board.trace[i];
-
-                    double oldgridx = gridx;
-                    double oldgridy = gridy;
-         
-                    Trace tempTrace = new Trace(0, 0);
-                    tempTrace.copy(selectedTrace);
-
-                    while(input.button1)
-                    {
-                      updateMouse();
-
-                      double deltax = gridx - oldgridx;
-                      double deltay = gridy - oldgridy;
-
-                      for(i = 0; i < selectedTrace.length; i++)
-                      {
-                        selectedTrace.x[i] = tempTrace.x[i] + deltax;
-                        selectedTrace.y[i] = tempTrace.y[i] + deltay;
-                      }
-
-                      panel.repaint();
-                      sleep();
-                    }
-                    break;
-                  }
-                }
-              }
-            }
+            boolean quit = false;
 
             // select pad
-            selectedPad = null;
             for(i = 0; i < board.max; i++)
             {
               double px = x - board.pad[i].x;
@@ -425,56 +380,95 @@ public class SimplePCB
                   panel.repaint();
                   sleep();
                 }
-
-                panel.repaint();
+                quit = true;
                 break;
+              }
+            }
+
+            if(quit)
+              break;
+
+            // select trace
+            for(i = 0; i < board.max; i++)
+            {
+              if(board.trace[i].status)
+              {
+                for(j = 1; j < board.trace[i].length; j++)
+                {
+                  double x1 = board.trace[i].x[j];
+                  double x2 = board.trace[i].x[j - 1];
+                  double y1 = board.trace[i].y[j];
+                  double y2 = board.trace[i].y[j - 1];
+
+                  if(pointOnLine(x, y, x1, y1, x2, y2, board.trace[i].size))
+                  {
+                    unselectAll();
+                    selectedTrace = board.trace[i];
+
+                    double oldgridx = gridx;
+                    double oldgridy = gridy;
+
+                    // edit trace path
+                    for(i = 0; i < selectedTrace.length; i++)
+                    {
+                      if(pointInCircle(x - selectedTrace.x[i], y - selectedTrace.y[i], 0.025))
+                      {
+                        selectedTrace.selectedVertex = i;
+
+                        double oldx = selectedTrace.x[i];
+                        double oldy = selectedTrace.y[i];
+         
+                        while(input.button1)
+                        {
+                          updateMouse();
+
+                          double deltax = gridx - oldgridx;
+                          double deltay = gridy - oldgridy;
+
+                          selectedTrace.x[i] = oldx + deltax;
+                          selectedTrace.y[i] = oldy + deltay;
+
+                          panel.repaint();
+                          sleep();
+                        }
+                        break;
+                      }
+                    }
+
+                    // move entire trace
+                    Trace tempTrace = new Trace(0, 0);
+                    tempTrace.copy(selectedTrace);
+
+                    while(input.button1)
+                    {
+                      updateMouse();
+
+                      double deltax = gridx - oldgridx;
+                      double deltay = gridy - oldgridy;
+
+                      for(i = 0; i < selectedTrace.length; i++)
+                      {
+                        selectedTrace.x[i] = tempTrace.x[i] + deltax;
+                        selectedTrace.y[i] = tempTrace.y[i] + deltay;
+                      }
+
+                      panel.repaint();
+                      sleep();
+                    }
+                    break;
+                  }
+                }
               }
             }
 
             panel.repaint();
             break;
           case 1:
-            // edit trace
-            if(selectedTrace != null)
-            {
-              for(i = 0; i < selectedTrace.length; i++)
-              {
-                if(pointInCircle(x - selectedTrace.x[i], y - selectedTrace.y[i], 0.025))
-                {
-                  selectedTrace.selectedVertex = i;
-
-                  double oldgridx = gridx;
-                  double oldgridy = gridy;
-                  double oldx = selectedTrace.x[i];
-                  double oldy = selectedTrace.y[i];
-         
-                  while(input.button1)
-                  {
-                    updateMouse();
-
-                    double deltax = gridx - oldgridx;
-                    double deltay = gridy - oldgridy;
-
-                    selectedTrace.x[i] = oldx + deltax;
-                    selectedTrace.y[i] = oldy + deltay;
-
-                    panel.repaint();
-                    sleep();
-                  }
-                  panel.repaint();
-                  break;
-                }
-              }
-            }
             break;
           case 2:
             unselectAll();
             board.addPad(gridx, gridy, padInnerSize, padOuterSize);
-            panel.repaint();
-
-            // skip dragging
-            input.button1 = false;
-            continue;
+            break;
           case 3:
             // new trace
             if(currentTrace == null)
