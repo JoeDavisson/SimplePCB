@@ -7,8 +7,10 @@ public class Trace
   boolean status = false;
   int layer;
   int selectedVertex = 0;
+  boolean filled = false;
+  int group = -1;
 
-  Trace(double temp_size, int temp_layer)
+  Trace(double temp_size, int temp_layer, boolean temp_filled)
   {
     x = new double[64];
     y = new double[64];
@@ -17,6 +19,8 @@ public class Trace
     status = false;
     layer = temp_layer;
     selectedVertex = 0;
+    filled = temp_filled;
+    group = -1;
   }
 
   public void copy(Trace trace)
@@ -34,6 +38,8 @@ public class Trace
     status = trace.status;
     layer = trace.layer;
     selectedVertex = trace.selectedVertex;
+    filled = trace.filled;
+    group = -1;
   }
 
   public void add(double temp_x, double temp_y)

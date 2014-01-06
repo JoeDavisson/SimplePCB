@@ -1,5 +1,6 @@
 import java.awt.*;
 import java.awt.geom.*;
+import java.awt.geom.*;
 import java.awt.event.*;
 import javax.swing.*;
 
@@ -17,27 +18,56 @@ public class RenderPanel extends JPanel
     setLayout(new BorderLayout());
   }
 
-  private void draw_trace(Graphics2D g, Trace trace, Color color)
+  private void drawTrace(Graphics2D g, Trace trace, Color color)
   {
-    g.setStroke(new BasicStroke((float)trace.size * zoom,
-                                BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
-    g.setColor(color);
-
     int i;
 
-    for(i = 1; i < trace.length; i++)
-    {
-      g.draw(new Line2D.Double(ox + (trace.x[i] * zoom),
-                 oy + (trace.y[i] * zoom),
-                 ox + (trace.x[i - 1] * zoom),
-                 oy + (trace.y[i - 1] * zoom)));
-    }
+    // dont draw polyon if being created
+    if(trace == SimplePCB.currentTrace && trace.filled)
+      return;
 
-    if(trace == SimplePCB.selectedTrace && trace.status)
+    g.setColor(color);
+
+    if(trace.filled)
+    {
+      // polygon
+      Path2D.Double path = new Path2D.Double(Path2D.WIND_EVEN_ODD, trace.length);
+      path.moveTo(ox + trace.x[0] * zoom, oy + trace.y[0] * zoom);
+
+      for(i = 0; i < trace.length; i++)
+      {
+        path.lineTo(ox + trace.x[i] * zoom, oy + trace.y[i] * zoom);
+      }
+
+      path.closePath();
+      g.fill(path);
+    }
+    else
+    {
+      // trace
+      g.setStroke(new BasicStroke((float)trace.size * zoom,
+                                BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+      for(i = 1; i < trace.length; i++)
+      {
+        g.draw(new Line2D.Double(ox + (trace.x[i] * zoom),
+                   oy + (trace.y[i] * zoom),
+                   ox + (trace.x[i - 1] * zoom),
+                   oy + (trace.y[i - 1] * zoom)));
+      }
+    }
+  }
+
+  private void highlightTrace(Graphics2D g, Trace trace)
+  {
+    //if(trace.status && (trace == SimplePCB.selectedTrace))
+    if(trace.status && (trace.group == SimplePCB.currentGroup))
     {
       g.setStroke(new BasicStroke((float)2.0));
       g.setColor(Color.WHITE);
 
+      int i;
+
+      // line
       for(i = 1; i < trace.length; i++)
       {
         g.draw(new Line2D.Double(ox + (trace.x[i] * zoom),
@@ -46,34 +76,47 @@ public class RenderPanel extends JPanel
                    oy + (trace.y[i - 1] * zoom)));
       }
 
-      for(i = 0; i < trace.length; i++)
+      // if polygon draw line back to start
+      if(trace.filled)
       {
-        if(i == trace.selectedVertex)
+        g.draw(new Line2D.Double(ox + (trace.x[0] * zoom),
+                   oy + (trace.y[0] * zoom),
+                   ox + (trace.x[trace.length - 1] * zoom),
+                   oy + (trace.y[trace.length - 1] * zoom)));
+      }
+
+      // handles
+      if(SimplePCB.toolMode == 1)
+      {
+        for(i = 0; i < trace.length; i++)
         {
-          g.fill(new Rectangle2D.Double(ox + (trace.x[i] * zoom) - 1.5 * zoom / 100,
-                     oy + (trace.y[i] * zoom) - 1.5 * zoom / 100,
-                     (3 * zoom) / 100,
-                     (3 * zoom) / 100));
-        }
-        else
-        {
-          g.fill(new Rectangle2D.Double(ox + (trace.x[i] * zoom) - zoom / 100,
-                     oy + (trace.y[i] * zoom) - zoom / 100,
-                     (2 * zoom) / 100,
-                     (2 * zoom) / 100));
+          if(i == trace.selectedVertex)
+          {
+            g.fill(new Rectangle2D.Double(ox + (trace.x[i] * zoom) - 1.5 * zoom / 100,
+                       oy + (trace.y[i] * zoom) - 1.5 * zoom / 100,
+                       (3 * zoom) / 100,
+                       (3 * zoom) / 100));
+          }
+          else
+          {
+            g.fill(new Rectangle2D.Double(ox + (trace.x[i] * zoom) - zoom / 100,
+                       oy + (trace.y[i] * zoom) - zoom / 100,
+                       (2 * zoom) / 100,
+                       (2 * zoom) / 100));
+          }
         }
       }
     }
   }
 
-  private void draw_pad(Graphics2D g, Pad pad, Color color)
+  private void drawPad(Graphics2D g, Pad pad, Color color)
   {
     double xx = pad.x;
     double yy = pad.y;
     double w1 = pad.outerSize;
     double w2 = pad.innerSize;
 
-    if(pad == SimplePCB.selectedPad)
+    if(pad.group == SimplePCB.currentGroup)
       g.setColor(new Color(255, 255, 255));
     else
       g.setColor(color);
@@ -90,7 +133,7 @@ public class RenderPanel extends JPanel
     g.draw(new Rectangle2D.Double(ox, oy, (board.w * zoom), (board.h * zoom)));
   }
  
-  private void draw_grid(Graphics2D g, int w, int h)
+  private void drawGrid(Graphics2D g, int w, int h)
   {
     int x, y;
     w = ((w + zoom) / zoom) * zoom;
@@ -108,7 +151,7 @@ public class RenderPanel extends JPanel
       g.draw(new Line2D.Double(0, (y + oy + fix) % h, w, (y + oy + fix) % h));
   }
 
-  public void draw_segment_preview(Graphics2D g, Color color)
+  public void drawSegmentPreview(Graphics2D g, Color color)
   {
     SimplePCB.updateMouse();
 
@@ -116,17 +159,38 @@ public class RenderPanel extends JPanel
     double y = SimplePCB.y;
     double gridx = SimplePCB.gridx;
     double gridy = SimplePCB.gridy;
+    int i;
+
+    g.setColor(color);
 
     Trace trace = SimplePCB.currentTrace;
     if(trace.status && trace.length > 0)
     {
-      g.setStroke(new BasicStroke((float)(trace.size * zoom),
-                                BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
-      g.setColor(color);
-      g.draw(new Line2D.Double(ox + (trace.x[trace.length - 1] * zoom),
-                 oy + (trace.y[trace.length - 1] * zoom),
-                 ox + (gridx * zoom),
-                 oy + (gridy * zoom)));
+      if(trace.filled)
+      {
+        // polygon
+        Path2D.Double path = new Path2D.Double(Path2D.WIND_EVEN_ODD, trace.length + 1);
+        path.moveTo(ox + trace.x[0] * zoom, oy + trace.y[0] * zoom);
+
+        for(i = 0; i < trace.length; i++)
+        {
+          path.lineTo(ox + trace.x[i] * zoom, oy + trace.y[i] * zoom);
+        }
+
+        path.lineTo(ox + gridx * zoom, oy + gridy * zoom);
+        path.closePath();
+        g.fill(path);
+      }
+      else
+      {
+        // trace
+        g.setStroke(new BasicStroke((float)(trace.size * zoom),
+                                  BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+        g.draw(new Line2D.Double(ox + (trace.x[trace.length - 1] * zoom),
+                   oy + (trace.y[trace.length - 1] * zoom),
+                   ox + (gridx * zoom),
+                   oy + (gridy * zoom)));
+      }
 
       g.setStroke(new BasicStroke((float)2.0));
       g.setColor(Color.WHITE);
@@ -167,37 +231,41 @@ public class RenderPanel extends JPanel
     for(i = 0; i < board.max; i++)
     {
       if(board.trace[i].status && board.trace[i].layer == 2)
-        draw_trace(g, board.trace[i], new Color(0, 255, 0));
+        drawTrace(g, board.trace[i], new Color(0, 255, 0));
     }
 
     // green pads
     for(i = 0; i < board.max; i++)
     {
       if(board.pad[i].status)
-        draw_pad(g, board.pad[i], new Color(0, 255, 0));
+        drawPad(g, board.pad[i], new Color(0, 255, 0));
     } 
 
     // red traces
     for(i = 0; i < board.max; i++)
     {
       if(board.trace[i].status && board.trace[i].layer == 1)
-        draw_trace(g, board.trace[i], new Color(255, 0, 0));
+        drawTrace(g, board.trace[i], new Color(255, 0, 0));
     }
 
     // yellow traces
     for(i = 0; i < board.max; i++)
     {
       if(board.trace[i].status && board.trace[i].layer == 0)
-        draw_trace(g, board.trace[i], new Color(255, 255, 0));
+        drawTrace(g, board.trace[i], new Color(255, 255, 0));
     }
 
     if(SimplePCB.currentTrace != null)
     {
-      draw_segment_preview(g, new Color(192, 192, 192));  
+      drawSegmentPreview(g, new Color(192, 192, 192));  
     }
 
+    // trace highlight & handles
+    for(i = 0; i < board.max; i++)
+      highlightTrace(g, board.trace[i]);
+
     // grid
-    draw_grid(g, w, h);
+    drawGrid(g, w, h);
   }
 }
 

@@ -6,9 +6,9 @@ public class Board
 
   public Trace trace[];
   public Pad pad[];
-  public Group group[];
+  //public Group group[];
 
-  int group_count;
+  //int group_count;
 
   Board(double temp_w, double temp_h)
   {
@@ -17,14 +17,14 @@ public class Board
 
     trace = new Trace[max];
     pad = new Pad[max];
-    group = new Group[max];
-    group_count = 0;
+    //group = new Group[max];
+    //group_count = 0;
 
     int i;
 
     for(i = 0; i < max; i++)
     {
-      trace[i] = new Trace(0, 0);
+      trace[i] = new Trace(0, 0, false);
       pad[i] = new Pad(0, 0, 0, 0);
     }
   }
@@ -53,7 +53,7 @@ public class Board
     pad[use].status = true;
   }
 
-  public Trace addTrace(double x, double y, double size, int layer)
+  public Trace addTrace(double x, double y, double size, int layer, boolean filled)
   {
     int i;
     int use = -1;
@@ -73,11 +73,13 @@ public class Board
     trace[use].size = size;
     trace[use].add(x, y);
     trace[use].layer = layer;
+    trace[use].filled = filled;
     trace[use].status = true;
 
     return trace[use];
   }
 
+/*
   public void addGroup()
   {
     group[group_count] = new Group();
@@ -86,5 +88,6 @@ public class Board
     if(group_count > max - 1)
       group_count = max - 1;
   }
+*/
 }
 

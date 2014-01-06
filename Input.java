@@ -94,6 +94,11 @@ public class Input implements KeyListener, MouseListener, MouseMotionListener, M
       button2 = true;
     if(e.getButton() == MouseEvent.BUTTON3)
       button3 = true;
+
+    if((e.getModifiersEx() & InputEvent.SHIFT_DOWN_MASK) == InputEvent.SHIFT_DOWN_MASK)
+    {
+      shiftdown = true;
+    }
   }
 
   public void mouseReleased(MouseEvent e)
@@ -119,15 +124,10 @@ public class Input implements KeyListener, MouseListener, MouseMotionListener, M
   public void mouseClicked(MouseEvent e)
   {
     if(e.getButton() == MouseEvent.BUTTON1 && e.getClickCount() == 1)
-      clicked = true;
+        clicked = true;
 
     if(e.getButton() == MouseEvent.BUTTON1 && e.getClickCount() == 2)
       doubleclicked = true;
-
-    if((e.getModifiersEx() & InputEvent.SHIFT_DOWN_MASK) == InputEvent.SHIFT_DOWN_MASK)
-    {
-      shiftdown = true;
-    }
   }
 
   // mouseMotionListener

@@ -6,8 +6,6 @@ import javax.imageio.*;
 
 public class Tools extends JToolBar
 {
-  int mode = 0;
-
   JToggleButton select = null;
   JToggleButton edit = null;
   JToggleButton pad = null;
@@ -28,7 +26,7 @@ public class Tools extends JToolBar
       {
         public void actionPerformed(ActionEvent e)
         {
-          mode = 0;
+          SimplePCB.setToolMode(0);
         }
       } );
 
@@ -40,7 +38,7 @@ public class Tools extends JToolBar
       {
         public void actionPerformed(ActionEvent e)
         {
-          mode = 1;
+          SimplePCB.setToolMode(1);
         }
       } );
 
@@ -52,7 +50,7 @@ public class Tools extends JToolBar
       {
         public void actionPerformed(ActionEvent e)
         {
-          mode = 2;
+          SimplePCB.setToolMode(2);
         }
       } );
 
@@ -64,19 +62,19 @@ public class Tools extends JToolBar
       {
         public void actionPerformed(ActionEvent e)
         {
-          mode = 3;
+          SimplePCB.setToolMode(3);
         }
       } );
 
     rect = new JToggleButton();
     rect.setToolTipText("Rectangle");
     rect.setIcon(getIcon("/data/rect.png"));
-    select.addActionListener(
+    rect.addActionListener(
       new ActionListener()
       {
         public void actionPerformed(ActionEvent e)
         {
-          mode = 4;
+          SimplePCB.setToolMode(4);
         }
       } );
 
@@ -92,9 +90,6 @@ public class Tools extends JToolBar
     add(pad);
     add(trace);
     add(rect);
-
-    // set default tool
-    mode = 0;
   }
 
   private ImageIcon getIcon(String s)

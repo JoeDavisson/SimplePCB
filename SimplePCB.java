@@ -46,12 +46,17 @@ public class SimplePCB
   public static Trace currentTrace = null;
   public static Pad selectedPad = null;
   public static Trace selectedTrace = null;
-  //public static Group selectionGroup = null;
 
   public static int mousex, mousey;
   public static int ox, oy;
   public static double x, y;
   public static double gridx, gridy;
+
+  public static int currentGroup = 0;
+  public static int nextGroup = 0;
+  public static boolean groupStarted = false;
+
+  public static int toolMode = 0;
 
   // about dialog
   public static void about()
@@ -76,6 +81,14 @@ public class SimplePCB
     catch(InterruptedException e)
     {
     }
+  }
+
+  // change tool
+  public static void setToolMode(int mode)
+  {
+    toolMode = mode;
+    cancelGroup();
+    panel.repaint();
   }
 
   // mouse related math
@@ -125,12 +138,148 @@ public class SimplePCB
      return false;
   }
 
+  public static double isLeft(double x1, double y1, double x2, double y2,
+                      double x3, double y3)
+  {
+    return (x2 - x1) * (y3 - y1) - (x3 - x1) * (y2 - y1);
+  }
+
+  public static boolean pointInTrace(Trace trace, double x, double y)
+  {
+    int i;
+    int inside = 0;
+
+    double px1, py1, px2, py2;
+
+    for(i = 0; i < trace.length - 1; i++)
+    {
+      px1 = trace.x[i];
+      py1 = trace.y[i];
+      px2 = trace.x[i + 1];
+      py2 = trace.y[i + 1];
+
+      if(py1 <= y)
+      {
+        if((py2 > y) && (isLeft(px1, py1, px2, py2, x, y) > 0))
+          inside++;
+      }
+      else
+      {
+        if((py2 <= y) && (isLeft(px1, py1, px2, py2, x, y) < 0))
+          inside++;
+      }
+    }
+
+    px1 = trace.x[0];
+    py1 = trace.y[0];
+    px2 = trace.x[trace.length - 1];
+    py2 = trace.y[trace.length - 1];
+
+    if(py1 <= y)
+    {
+      if((py2 > y) && (isLeft(px1, py1, px2, py2, x, y) > 0))
+        inside++;
+    }
+    else
+    {
+      if((py2 <= y) && (isLeft(px1, py1, px2, py2, x, y) < 0))
+        inside++;
+    }
+ 
+    if((inside & 1) == 1)
+      return true;
+    else
+      return false;
+  }
+
   // unselect all
   public static void unselectAll()
   {
     currentTrace = null;
     selectedTrace = null;
     selectedPad = null;
+  }
+
+  public static void cancelGroup()
+  {
+    // remove objects from uncompleted group
+    int i;
+
+    for(i = 0; i < board.max; i++)
+    {
+      if(board.trace[i].group == nextGroup)
+        board.trace[i].group = -1;
+
+      if(board.pad[i].group == nextGroup)
+        board.pad[i].group = -1;
+    }
+
+    groupStarted = false;
+    currentGroup = nextGroup;
+  }
+
+  // finish group
+  public static void finishGroup()
+  {
+    nextGroup++;
+    currentGroup = nextGroup;
+    groupStarted = false;
+  }
+
+  public static void unGroup()
+  {
+    int i;
+
+    for(i = 0; i < board.max; i++)
+    {
+      if(board.pad[i].group == currentGroup)
+        board.pad[i].group = -1;
+
+      if(board.trace[i].group == currentGroup)
+        board.trace[i].group = -1;
+    }
+
+    currentGroup = nextGroup;
+    groupStarted = false;
+    panel.repaint();
+  }
+
+  // move entire group
+  public static void moveGroup()
+  {
+    int i, j;
+
+    while(input.button1)
+    {
+      double oldgridx = gridx;
+      double oldgridy = gridy;
+
+      updateMouse();
+
+      double deltax = gridx - oldgridx;
+      double deltay = gridy - oldgridy;
+
+      for(i = 0; i < board.max; i++)
+      {
+        if(board.pad[i].status && board.pad[i].group == currentGroup)
+        {
+          board.pad[i].x += deltax;
+          board.pad[i].y += deltay;
+        }
+
+        if(board.trace[i].status && board.trace[i].group == currentGroup)
+        {
+          for(j = 0; j < board.trace[i].length; j++)
+          {
+            board.trace[i].x[j] += deltax;
+            board.trace[i].y[j] += deltay;
+          }
+        }
+      }
+
+      panel.repaint();
+      sleep();
+    }
   }
 
   // program entry
@@ -183,9 +332,27 @@ public class SimplePCB
       {
         public void actionPerformed(ActionEvent e)
         {
-          switch(tools.mode)
+          int i;
+
+          switch(toolMode)
           {
             case 0:
+              // delete group
+              for(i = 0; i < board.max; i++)
+              {
+                if(board.trace[i].group == currentGroup)
+                { 
+                  board.trace[i].status = false;
+                  board.trace[i].group = -1;
+                }
+
+                if(board.pad[i].group == currentGroup)
+                { 
+                  board.pad[i].status = false;
+                  board.pad[i].group = -1;
+                }
+              }
+
               // delete trace
               if(selectedTrace != null)
               {
@@ -199,6 +366,7 @@ public class SimplePCB
               }
               break;
             case 1:
+            case 4:
               // delete vertex
               if(selectedTrace != null)
               {
@@ -266,7 +434,6 @@ public class SimplePCB
 
           sleep();
         }
-
         continue;
       }
 
@@ -295,6 +462,7 @@ public class SimplePCB
           {
             currentTrace.length = 0;
             currentTrace.status = false;
+            currentTrace.group = -1;
             selectedTrace = null;
           }
           else
@@ -311,9 +479,10 @@ public class SimplePCB
       // double click
       if(input.doubleclicked)
       {
-        switch(tools.mode)
+        switch(toolMode)
         {
           case 1:
+          case 4:
             // add vertex
             if(selectedTrace != null)
             {
@@ -324,7 +493,7 @@ public class SimplePCB
                 double y1 = selectedTrace.y[i];
                 double y2 = selectedTrace.y[i - 1];
 
-                if(pointOnLine(x, y, x1, y1, x2, y2, selectedTrace.size))
+                if(pointOnLine(x, y, x1, y1, x2, y2, .025))
                 {
                   selectedTrace.insert(i, gridx, gridy);
                   selectedTrace.selectedVertex = i;
@@ -342,12 +511,10 @@ public class SimplePCB
       // left button click
       if(input.button1)
       {
-        switch(tools.mode)
+        switch(toolMode)
         {
           case 0:
             unselectAll();
-
-            boolean quit = false;
 
             // select pad
             for(i = 0; i < board.max; i++)
@@ -361,109 +528,133 @@ public class SimplePCB
                 unselectAll();
                 selectedPad = board.pad[i];
 
-                double oldgridx = gridx;
-                double oldgridy = gridy;
-         
-                Pad tempPad = new Pad(0, 0, 0, 0);
-                tempPad.copy(selectedPad);
-
-                while(input.button1)
+                // add to group
+                if((!groupStarted || input.shiftdown)
+                    && selectedPad.group == -1)
                 {
-                  updateMouse();
-
-                  double deltax = gridx - oldgridx;
-                  double deltay = gridy - oldgridy;
-
-                  selectedPad.x = tempPad.x + deltax;
-                  selectedPad.y = tempPad.y + deltay;
-
-                  panel.repaint();
-                  sleep();
+                  input.shiftdown = false;
+                  selectedPad.group = nextGroup;
+                  currentGroup = nextGroup;
+                  groupStarted = true;
                 }
-                quit = true;
+                else if(selectedPad.group == -1)
+                {
+                  cancelGroup();
+                  selectedPad.group = nextGroup;
+                  currentGroup = nextGroup;
+                  groupStarted = true;
+                }
+                else if(selectedPad.group != -1 && selectedPad.group != currentGroup)
+                {
+                  cancelGroup();
+                  currentGroup = selectedPad.group;
+                  groupStarted = false;
+                }
                 break;
               }
             }
-
-            if(quit)
-              break;
 
             // select trace
             for(i = 0; i < board.max; i++)
             {
               if(board.trace[i].status)
               {
-                for(j = 1; j < board.trace[i].length; j++)
+                if(board.trace[i].filled)
                 {
-                  double x1 = board.trace[i].x[j];
-                  double x2 = board.trace[i].x[j - 1];
-                  double y1 = board.trace[i].y[j];
-                  double y2 = board.trace[i].y[j - 1];
-
-                  if(pointOnLine(x, y, x1, y1, x2, y2, board.trace[i].size))
+                  // polygon
+                  if(pointInTrace(board.trace[i], x, y))
                   {
-                    unselectAll();
-                    selectedTrace = board.trace[i];
-
-                    double oldgridx = gridx;
-                    double oldgridy = gridy;
-
-                    // edit trace path
-                    for(i = 0; i < selectedTrace.length; i++)
-                    {
-                      if(pointInCircle(x - selectedTrace.x[i], y - selectedTrace.y[i], 0.025))
-                      {
-                        selectedTrace.selectedVertex = i;
-
-                        double oldx = selectedTrace.x[i];
-                        double oldy = selectedTrace.y[i];
-         
-                        while(input.button1)
-                        {
-                          updateMouse();
-
-                          double deltax = gridx - oldgridx;
-                          double deltay = gridy - oldgridy;
-
-                          selectedTrace.x[i] = oldx + deltax;
-                          selectedTrace.y[i] = oldy + deltay;
-
-                          panel.repaint();
-                          sleep();
-                        }
-                        break;
-                      }
-                    }
-
-                    // move entire trace
-                    Trace tempTrace = new Trace(0, 0);
-                    tempTrace.copy(selectedTrace);
-
-                    while(input.button1)
-                    {
-                      updateMouse();
-
-                      double deltax = gridx - oldgridx;
-                      double deltay = gridy - oldgridy;
-
-                      for(i = 0; i < selectedTrace.length; i++)
-                      {
-                        selectedTrace.x[i] = tempTrace.x[i] + deltax;
-                        selectedTrace.y[i] = tempTrace.y[i] + deltay;
-                      }
-
-                      panel.repaint();
-                      sleep();
-                    }
-                    break;
+                      unselectAll();
+                      selectedTrace = board.trace[i];
                   }
+                }
+                else
+                {
+                  // trace
+                  for(j = 1; j < board.trace[i].length; j++)
+                  {
+                    double x1 = board.trace[i].x[j];
+                    double x2 = board.trace[i].x[j - 1];
+                    double y1 = board.trace[i].y[j];
+                    double y2 = board.trace[i].y[j - 1];
+
+                    if(pointOnLine(x, y, x1, y1, x2, y2, board.trace[i].size))
+                    {
+                      unselectAll();
+                      selectedTrace = board.trace[i];
+                      break;
+                    }
+                  }
+                }
+
+                if(selectedTrace != null)
+                {
+                  // add to group
+                  if((!groupStarted || input.shiftdown)
+                      && selectedTrace.group == -1)
+                  {
+                    input.shiftdown = false;
+                    selectedTrace.group = nextGroup;
+                    currentGroup = nextGroup;
+                    groupStarted = true;
+                  }
+                  else if(selectedTrace.group == -1)
+                  {
+                    cancelGroup();
+                    selectedTrace.group = nextGroup;
+                    currentGroup = nextGroup;
+                    groupStarted = true;
+                  }
+                  else if(selectedTrace.group != -1 && selectedTrace.group != currentGroup)
+                  {
+                    cancelGroup();
+                    currentGroup = selectedTrace.group;
+                    groupStarted = false;
+                  }
+                  break;
                 }
               }
             }
 
+            if(selectedPad == null && selectedTrace == null)
+              cancelGroup();
+            else
+              moveGroup();
+
             panel.repaint();
             break;
           case 1:
+            // edit trace path
+            if(selectedTrace != null)
+            {
+              for(i = 0; i < selectedTrace.length; i++)
+              {
+                if(pointInCircle(x - selectedTrace.x[i], y - selectedTrace.y[i], 0.025))
+                {
+                  selectedTrace.selectedVertex = i;
+
+                  double oldgridx = gridx;
+                  double oldgridy = gridy;
+                  double oldx = selectedTrace.x[i];
+                  double oldy = selectedTrace.y[i];
+         
+                  while(input.button1)
+                  {
+                    updateMouse();
+
+                    double deltax = gridx - oldgridx;
+                    double deltay = gridy - oldgridy;
+
+                    selectedTrace.x[i] = oldx + deltax;
+                    selectedTrace.y[i] = oldy + deltay;
+
+                    panel.repaint();
+                    sleep();
+                  }
+                  break;
+                }
+              }
+            }
             break;
           case 2:
             unselectAll();
@@ -475,7 +666,17 @@ public class SimplePCB
             {
               unselectAll();
               // add first segment
-              currentTrace = board.addTrace(gridx, gridy, traceSize, layers.current);
+              currentTrace = board.addTrace(gridx, gridy, traceSize, layers.current, false);
+              panel.repaint();
+            }
+            break;
+          case 4:
+            // new polygon
+            if(currentTrace == null)
+            {
+              unselectAll();
+              // add first segment
+              currentTrace = board.addTrace(gridx, gridy, traceSize, layers.current, true);
               panel.repaint();
             }
             break;

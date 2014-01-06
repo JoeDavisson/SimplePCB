@@ -54,6 +54,7 @@ public class MainMenu extends JMenuBar
       {
         public void actionPerformed(ActionEvent e)
         {
+          SimplePCB.finishGroup();
         }
       } );
 
@@ -63,6 +64,7 @@ public class MainMenu extends JMenuBar
       {
         public void actionPerformed(ActionEvent e)
         {
+          SimplePCB.unGroup();
         }
       } );
 
