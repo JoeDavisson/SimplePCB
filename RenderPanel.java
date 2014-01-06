@@ -59,8 +59,7 @@ public class RenderPanel extends JPanel
 
   private void highlightTrace(Graphics2D g, Trace trace)
   {
-    //if(trace.status && (trace == SimplePCB.selectedTrace))
-    if(trace.status && (trace.group == SimplePCB.currentGroup))
+    if(trace.status && ((trace == SimplePCB.selectedTrace) || (trace.group == SimplePCB.currentGroup)))
     {
       g.setStroke(new BasicStroke((float)2.0));
       g.setColor(Color.WHITE);
