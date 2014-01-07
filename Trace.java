@@ -84,8 +84,11 @@ public class Trace
     }
 
     length--;
-    if(length < 0)
+    if(length < 2)
+    {
       length = 0;
+      status = false;
+    }
   }
 }
 

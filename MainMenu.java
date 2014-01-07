@@ -30,17 +30,8 @@ public class MainMenu extends JMenuBar
     // Edit menu
     JMenu editMenu = new JMenu("Edit");
 
-    JMenuItem copyItem = new JMenuItem("Copy");
-    copyItem.addActionListener(
-      new ActionListener()
-      {
-        public void actionPerformed(ActionEvent e)
-        {
-        }
-      } );
-
-    JMenuItem pasteItem = new JMenuItem("Paste");
-    pasteItem.addActionListener(
+    JMenuItem duplicateItem = new JMenuItem("Duplicate");
+    duplicateItem.addActionListener(
       new ActionListener()
       {
         public void actionPerformed(ActionEvent e)
@@ -88,8 +79,7 @@ public class MainMenu extends JMenuBar
         }
       } );
 
-    editMenu.add(copyItem);
-    editMenu.add(pasteItem);
+    editMenu.add(duplicateItem);
     editMenu.addSeparator();
     editMenu.add(groupItem);
     editMenu.add(ungroupItem);

@@ -144,7 +144,7 @@ public class SimplePCB
     return (x2 - x1) * (y3 - y1) - (x3 - x1) * (y2 - y1);
   }
 
-  public static boolean pointInTrace(Trace trace, double x, double y)
+  public static boolean pointInPoly(Trace trace, double x, double y)
   {
     int i;
     int inside = 0;
@@ -501,6 +501,21 @@ public class SimplePCB
                   break;
                 }
               }
+
+              if(selectedTrace.filled)
+              {
+                double x1 = selectedTrace.x[0];
+                double x2 = selectedTrace.x[selectedTrace.length - 1];
+                double y1 = selectedTrace.y[0];
+                double y2 = selectedTrace.y[selectedTrace.length - 1];
+
+                if(pointOnLine(x, y, x1, y1, x2, y2, .025))
+                {
+                  selectedTrace.insert(i, gridx, gridy);
+                  selectedTrace.selectedVertex = i;
+                  panel.repaint();
+                }
+              }
             }
             break;
         }
@@ -562,7 +577,7 @@ public class SimplePCB
                 if(board.trace[i].filled)
                 {
                   // polygon
-                  if(pointInTrace(board.trace[i], x, y))
+                  if(pointInPoly(board.trace[i], x, y))
                   {
                       unselectAll();
                       selectedTrace = board.trace[i];
