@@ -65,6 +65,24 @@ public class SimplePCB
       "About", JOptionPane.INFORMATION_MESSAGE);
   }
 
+  // save
+  public static void exportLayer(int layer) 
+  {
+    final JFileChooser fc = new JFileChooser();
+
+    if(fc.showSaveDialog(win) == JFileChooser.APPROVE_OPTION)
+    {
+      File file = fc.getSelectedFile();
+      if(file != null && file.exists())
+      {
+        int response = JOptionPane.showConfirmDialog(win, "\"" + file.getName() + "\" exists, overwrite?", "File Exists", JOptionPane.YES_NO_OPTION);
+        if(response != JOptionPane.YES_OPTION)
+          return;
+      }
+      Gerber.save(board, file, layer);
+    }
+  }
+
   // quit
   public static void quit() 
   {
@@ -531,44 +549,6 @@ public class SimplePCB
           case 0:
             unselectAll();
 
-            // select pad
-            for(i = 0; i < board.max; i++)
-            {
-              double px = x - board.pad[i].x;
-              double py = y - board.pad[i].y;
-              double pr = board.pad[i].outerSize / 2;
-              
-              if(board.pad[i].status && pointInCircle(px, py, pr))
-              {
-                unselectAll();
-                selectedPad = board.pad[i];
-
-                // add to group
-                if((!groupStarted || input.shiftdown)
-                    && selectedPad.group == -1)
-                {
-                  input.shiftdown = false;
-                  selectedPad.group = nextGroup;
-                  currentGroup = nextGroup;
-                  groupStarted = true;
-                }
-                else if(selectedPad.group == -1)
-                {
-                  cancelGroup();
-                  selectedPad.group = nextGroup;
-                  currentGroup = nextGroup;
-                  groupStarted = true;
-                }
-                else if(selectedPad.group != -1 && selectedPad.group != currentGroup)
-                {
-                  cancelGroup();
-                  currentGroup = selectedPad.group;
-                  groupStarted = false;
-                }
-                break;
-              }
-            }
-
             // select trace
             for(i = 0; i < board.max; i++)
             {
@@ -628,6 +608,44 @@ public class SimplePCB
                   }
                   break;
                 }
+              }
+            }
+
+            // select pad
+            for(i = 0; i < board.max; i++)
+            {
+              double px = x - board.pad[i].x;
+              double py = y - board.pad[i].y;
+              double pr = board.pad[i].outerSize / 2;
+              
+              if(board.pad[i].status && pointInCircle(px, py, pr))
+              {
+                unselectAll();
+                selectedPad = board.pad[i];
+
+                // add to group
+                if((!groupStarted || input.shiftdown)
+                    && selectedPad.group == -1)
+                {
+                  input.shiftdown = false;
+                  selectedPad.group = nextGroup;
+                  currentGroup = nextGroup;
+                  groupStarted = true;
+                }
+                else if(selectedPad.group == -1)
+                {
+                  cancelGroup();
+                  selectedPad.group = nextGroup;
+                  currentGroup = nextGroup;
+                  groupStarted = true;
+                }
+                else if(selectedPad.group != -1 && selectedPad.group != currentGroup)
+                {
+                  cancelGroup();
+                  currentGroup = selectedPad.group;
+                  groupStarted = false;
+                }
+                break;
               }
             }
 

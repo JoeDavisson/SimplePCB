@@ -9,6 +9,7 @@ public class Trace
   int selectedVertex = 0;
   boolean filled = false;
   int group = -1;
+  int id = 0;
 
   Trace(double temp_size, int temp_layer, boolean temp_filled)
   {

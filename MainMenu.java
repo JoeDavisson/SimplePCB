@@ -12,6 +12,52 @@ public class MainMenu extends JMenuBar
     // file menu
     JMenu fileMenu = new JMenu("File");
 
+    JMenuItem saveItem = new JMenuItem("Save Project...");
+    saveItem.addActionListener(
+      new ActionListener()
+      {
+        public void actionPerformed(ActionEvent e)
+        {
+        }
+      } );
+
+    // export
+    JMenu exportMenu = new JMenu("Export");
+
+    JMenuItem yellowItem = new JMenuItem("Artwork Layer...");
+    yellowItem.addActionListener(
+      new ActionListener()
+      {
+        public void actionPerformed(ActionEvent e)
+        {
+          SimplePCB.exportLayer(0);
+        }
+      } );
+
+    JMenuItem redItem = new JMenuItem("Top Layer...");
+    redItem.addActionListener(
+      new ActionListener()
+      {
+        public void actionPerformed(ActionEvent e)
+        {
+          SimplePCB.exportLayer(1);
+        }
+      } );
+
+    JMenuItem greenItem = new JMenuItem("Bottom Layer...");
+    greenItem.addActionListener(
+      new ActionListener()
+      {
+        public void actionPerformed(ActionEvent e)
+        {
+          SimplePCB.exportLayer(2);
+        }
+      } );
+
+    exportMenu.add(yellowItem);
+    exportMenu.add(redItem);
+    exportMenu.add(greenItem);
+
     // quit
     JMenuItem quitItem = new JMenuItem("Quit");
     quitItem.addActionListener(
@@ -23,6 +69,9 @@ public class MainMenu extends JMenuBar
         }
       } );
 
+    fileMenu.add(saveItem);
+    fileMenu.add(exportMenu);
+    fileMenu.addSeparator();
     fileMenu.add(quitItem);
 
     add(fileMenu);
