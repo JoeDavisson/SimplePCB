@@ -52,11 +52,16 @@ public class SimplePCB
   public static double x, y;
   public static double gridx, gridy;
 
-  public static int currentGroup = 0;
   public static int nextGroup = 0;
-  public static boolean groupStarted = false;
 
   public static int toolMode = 0;
+
+  public static boolean selectRectStatus = false;
+  public static int selectRectX1; 
+  public static int selectRectY1; 
+  public static int selectRectX2; 
+  public static int selectRectY2; 
+  public static boolean selectionStarted = false;
 
   // about dialog
   public static void about()
@@ -105,7 +110,7 @@ public class SimplePCB
   public static void setToolMode(int mode)
   {
     toolMode = mode;
-    cancelGroup();
+    cancelSelection();
     panel.repaint();
   }
 
@@ -218,30 +223,50 @@ public class SimplePCB
     selectedPad = null;
   }
 
-  public static void cancelGroup()
+  // cancel selection
+  public static void cancelSelection()
   {
-    // remove objects from uncompleted group
     int i;
 
     for(i = 0; i < board.max; i++)
     {
-      if(board.trace[i].group == nextGroup)
-        board.trace[i].group = -1;
-
-      if(board.pad[i].group == nextGroup)
-        board.pad[i].group = -1;
+      board.trace[i].selected = false;
+      board.pad[i].selected = false;
     }
 
-    groupStarted = false;
-    currentGroup = nextGroup;
+    selectionStarted = false;
   }
 
   // finish group
   public static void finishGroup()
   {
+    int i;
+
+    for(i = 0; i < board.max; i++)
+    {
+      if(board.trace[i].selected)
+        board.trace[i].group = nextGroup;
+      if(board.pad[i].selected)
+        board.pad[i].group = nextGroup;
+    }
+
+    cancelSelection();
+   
     nextGroup++;
-    currentGroup = nextGroup;
-    groupStarted = false;
+    panel.repaint();
+  }
+
+  public static void addGroupToSelection(int group)
+  {
+    int i;
+
+    for(i = 0; i < board.max; i++)
+    {
+      if(board.trace[i].group == group)
+        board.trace[i].selected = true;
+      if(board.pad[i].group == group)
+        board.pad[i].selected = true;
+    }
   }
 
   public static void unGroup()
@@ -250,15 +275,13 @@ public class SimplePCB
 
     for(i = 0; i < board.max; i++)
     {
-      if(board.pad[i].group == currentGroup)
+      if(board.pad[i].selected)
         board.pad[i].group = -1;
 
-      if(board.trace[i].group == currentGroup)
+      if(board.trace[i].selected)
         board.trace[i].group = -1;
     }
 
-    currentGroup = nextGroup;
-    groupStarted = false;
     panel.repaint();
   }
 
@@ -279,13 +302,13 @@ public class SimplePCB
 
       for(i = 0; i < board.max; i++)
       {
-        if(board.pad[i].status && board.pad[i].group == currentGroup)
+        if(board.pad[i].selected)
         {
           board.pad[i].x += deltax;
           board.pad[i].y += deltay;
         }
 
-        if(board.trace[i].status && board.trace[i].group == currentGroup)
+        if(board.trace[i].selected)
         {
           for(j = 0; j < board.trace[i].length; j++)
           {
@@ -355,16 +378,16 @@ public class SimplePCB
           switch(toolMode)
           {
             case 0:
-              // delete group
+              // delete selection
               for(i = 0; i < board.max; i++)
               {
-                if(board.trace[i].group == currentGroup)
+                if(board.trace[i].selected)
                 { 
                   board.trace[i].status = false;
                   board.trace[i].group = -1;
                 }
 
-                if(board.pad[i].group == currentGroup)
+                if(board.pad[i].selected)
                 { 
                   board.pad[i].status = false;
                   board.pad[i].group = -1;
@@ -377,11 +400,13 @@ public class SimplePCB
                 selectedTrace.status = false;
                 selectedTrace.length = 0;
               }
+
               // delete pad
               if(selectedPad != null)
               {
                 selectedPad.status = false;
               }
+
               break;
             case 1:
             case 4:
@@ -559,8 +584,8 @@ public class SimplePCB
                   // polygon
                   if(pointInPoly(board.trace[i], x, y))
                   {
-                      unselectAll();
-                      selectedTrace = board.trace[i];
+                    unselectAll();
+                    selectedTrace = board.trace[i];
                   }
                 }
                 else
@@ -584,28 +609,23 @@ public class SimplePCB
 
                 if(selectedTrace != null)
                 {
-                  // add to group
-                  if((!groupStarted || input.shiftdown)
-                      && selectedTrace.group == -1)
+                  if(input.shiftdown)
                   {
                     input.shiftdown = false;
-                    selectedTrace.group = nextGroup;
-                    currentGroup = nextGroup;
-                    groupStarted = true;
+                    selectedTrace.selected = true;
+
+                    if(selectedTrace.group != -1)
+                      addGroupToSelection(selectedTrace.group);
                   }
-                  else if(selectedTrace.group == -1)
+                  else if(!selectedTrace.selected)
                   {
-                    cancelGroup();
-                    selectedTrace.group = nextGroup;
-                    currentGroup = nextGroup;
-                    groupStarted = true;
+                    cancelSelection();
+                    selectedTrace.selected = true;
+
+                    if(selectedTrace.group != -1)
+                      addGroupToSelection(selectedTrace.group);
                   }
-                  else if(selectedTrace.group != -1 && selectedTrace.group != currentGroup)
-                  {
-                    cancelGroup();
-                    currentGroup = selectedTrace.group;
-                    groupStarted = false;
-                  }
+
                   break;
                 }
               }
@@ -623,36 +643,150 @@ public class SimplePCB
                 unselectAll();
                 selectedPad = board.pad[i];
 
-                // add to group
-                if((!groupStarted || input.shiftdown)
-                    && selectedPad.group == -1)
+                if(input.shiftdown)
                 {
                   input.shiftdown = false;
-                  selectedPad.group = nextGroup;
-                  currentGroup = nextGroup;
-                  groupStarted = true;
+                  selectedPad.selected = true;
+
+                  if(selectedPad.group != -1)
+                    addGroupToSelection(selectedPad.group);
                 }
-                else if(selectedPad.group == -1)
+                else if(!selectedPad.selected)
                 {
-                  cancelGroup();
-                  selectedPad.group = nextGroup;
-                  currentGroup = nextGroup;
-                  groupStarted = true;
+                  cancelSelection();
+                  selectedPad.selected = true;
+
+                  if(selectedPad.group != -1)
+                    addGroupToSelection(selectedPad.group);
                 }
-                else if(selectedPad.group != -1 && selectedPad.group != currentGroup)
-                {
-                  cancelGroup();
-                  currentGroup = selectedPad.group;
-                  groupStarted = false;
-                }
+
                 break;
               }
             }
 
+            // begin rubber band select
             if(selectedPad == null && selectedTrace == null)
-              cancelGroup();
+            {
+              selectRectStatus = true;
+              selectRectX1 = mousex; 
+              selectRectY1 = mousey; 
+
+              boolean cancel = true;
+
+              while(input.button1)
+              {
+                updateMouse();
+                selectRectX2 = mousex; 
+                selectRectY2 = mousey; 
+                panel.repaint();
+                sleep();
+              }
+
+              selectRectStatus = false;
+
+              double x1 = (double)(SimplePCB.selectRectX1 - ox) / zoom;
+              double y1 = (double)(SimplePCB.selectRectY1 - oy) / zoom;
+              double x2 = (double)(SimplePCB.selectRectX2 - ox) / zoom;
+              double y2 = (double)(SimplePCB.selectRectY2 - oy) / zoom;
+
+              if(x1 > x2)
+              {
+                double temp = x1;
+                x1 = x2;
+                x2 = temp;
+              }
+
+              if(y1 > y2)
+              {
+                double temp = y1;
+                y1 = y2;
+                y2 = temp;
+              }
+
+              if(input.shiftdown)
+              {
+                // add to current selection
+                for(i = 0; i < board.max; i++)
+                {
+                  Trace trace = board.trace[i];
+
+                  if(trace.status)
+                  {
+                    if(trace.inbox(x1, y1, x2, y2))
+                    {
+                      trace.selected = true;
+                      if(trace.group != -1)
+                        addGroupToSelection(trace.group);
+                      cancel = false;
+                    }
+                  }
+                }
+
+                for(i = 0; i < board.max; i++)
+                {
+                  Pad pad = board.pad[i];
+                   if(pad.status)
+                  {
+                    if(pad.inbox(x1, y1, x2, y2))
+                    {
+                      pad.selected = true;
+                      if(pad.group != -1)
+                        addGroupToSelection(pad.group);
+                      cancel = false;
+                    }
+                  }
+                }
+              }
+              else
+              {
+                // add to new selection
+                cancelSelection();
+
+                for(i = 0; i < board.max; i++)
+                {
+                  Trace trace = board.trace[i];
+
+                  if(trace.status)
+                  {
+                    if(trace.inbox(x1, y1, x2, y2))
+                    {
+                      trace.selected = true;
+                      if(trace.group != -1)
+                        addGroupToSelection(trace.group);
+                      cancel = false;
+                    }
+                  }
+                }
+
+                for(i = 0; i < board.max; i++)
+                {
+                  Pad pad = board.pad[i];
+
+                  if(pad.status)
+                  {
+                    if(pad.inbox(x1, y1, x2, y2))
+                    {
+                      pad.selected = true;
+                      if(pad.group != -1)
+                        addGroupToSelection(pad.group);
+                      cancel = false;
+                    }
+                  }
+                }
+              }
+
+              if(cancel)
+                cancelSelection();
+            }
             else
+            {
+  /*            if(selectedTrace != null)
+                selectedTrace.selected = true;
+              if(selectedPad != null)
+                selectedPad.selected = true;
+*/
               moveGroup();
+            }
 
             panel.repaint();
             break;

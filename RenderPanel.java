@@ -59,7 +59,7 @@ public class RenderPanel extends JPanel
 
   private void highlightTrace(Graphics2D g, Trace trace)
   {
-    if(trace.status && ((trace == SimplePCB.selectedTrace) || (trace.group == SimplePCB.currentGroup)))
+    if(trace.selected/* || trace.group == SimplePCB.currentGroup*/)
     {
       g.setStroke(new BasicStroke((float)2.0));
       g.setColor(Color.WHITE);
@@ -115,7 +115,7 @@ public class RenderPanel extends JPanel
     double w1 = pad.outerSize;
     double w2 = pad.innerSize;
 
-    if(pad.group == SimplePCB.currentGroup)
+    if(pad.selected/* || pad.group == SimplePCB.currentGroup*/)
       g.setColor(new Color(255, 255, 255));
     else
       g.setColor(color);
@@ -148,6 +148,8 @@ public class RenderPanel extends JPanel
       g.draw(new Line2D.Double((x + ox + fix) % w, 0, (x + ox + fix) % w, h));
     for(y = 0; y < h; y += zoom / 10)
       g.draw(new Line2D.Double(0, (y + oy + fix) % h, w, (y + oy + fix) % h));
+
+    g.setPaintMode();
   }
 
   public void drawSegmentPreview(Graphics2D g, Color color)
@@ -265,6 +267,33 @@ public class RenderPanel extends JPanel
 
     // grid
     drawGrid(g, w, h);
+
+    // rubber band select
+    if(SimplePCB.selectRectStatus)
+    {
+      int x1 = SimplePCB.selectRectX1;
+      int y1 = SimplePCB.selectRectY1;
+      int x2 = SimplePCB.selectRectX2;
+      int y2 = SimplePCB.selectRectY2;
+
+      if(x1 > x2)
+      {
+        int temp = x1;
+        x1 = x2;
+        x2 = temp;
+      }
+
+      if(y1 > y2)
+      {
+        int temp = y1;
+        y1 = y2;
+        y2 = temp;
+      }
+
+      g.setColor(Color.white);
+      g.setStroke(new BasicStroke(2));
+      g.draw(new Rectangle2D.Double(x1, y1, x2 - x1, y2 - y1));
+    }
   }
 }
 

@@ -9,6 +9,7 @@ public class Trace
   int selectedVertex = 0;
   boolean filled = false;
   int group = -1;
+  boolean selected = false;
   int id = 0;
 
   Trace(double temp_size, int temp_layer, boolean temp_filled)
@@ -90,6 +91,40 @@ public class Trace
       length = 0;
       status = false;
     }
+  }
+
+  public boolean inbox(double x1, double y1, double x2, double y2)
+  {
+    int i;
+
+    int count = 0;
+
+    if(filled)
+    {
+      for(i = 0; i < length; i++)
+      {
+        if(x[i] > x1 && x[i] < x2 && y[i] > y1 && y[i] < y2)
+        {
+          count++;
+        }
+      }
+    }
+    else
+    {
+      for(i = 0; i < length; i++)
+      {
+        if( (x[i] - size / 2) > x1 && (x[i] + size / 2) < x2
+         && (y[i] - size / 2) > y1 && (y[i] + size / 2) < y2)
+        {
+          count++;
+        }
+      }
+    }
+
+    if(count == length)
+      return true;
+    else
+      return false;
   }
 }
 
