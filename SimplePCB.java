@@ -63,6 +63,10 @@ public class SimplePCB
   public static int selectRectY2; 
   public static boolean selectionStarted = false;
 
+  public static double centerx = 0;
+  public static double centery = 0;
+  public static double angle = Math.toRadians(90);
+
   // about dialog
   public static void about()
   {
@@ -88,6 +92,144 @@ public class SimplePCB
     }
   }
 
+  // find center of selection
+  public static void findCenter()
+  {
+    int i, j;
+
+    double x1 = 1000, y1 = 1000, x2 = -1000, y2 = -1000;
+
+    for(i = 0; i < board.max; i++)
+    {
+      Trace trace = board.trace[i];
+      Pad pad = board.pad[i];
+
+      if(trace.selected)
+      {
+        for(j = 0; j < trace.length; j++)
+        {
+          if(trace.x[j] < x1)
+            x1 = trace.x[j];
+          if(trace.y[j] < y1)
+            y1 = trace.y[j];
+          if(trace.x[j] > x2)
+            x2 = trace.x[j];
+          if(trace.y[j] > y2)
+            y2 = trace.y[j];
+        }
+      }
+      if(pad.selected)
+      {
+        if(pad.x < x1)
+          x1 = pad.x;
+        if(pad.y < y1)
+          y1 = pad.y;
+        if(pad.x > x2)
+          x2 = pad.x;
+        if(pad.y > y2)
+          y2 = pad.y;
+      }
+
+      centerx = x1 + (x2 - x1) / 2;
+      centery = y1 + (y2 - y1) / 2;
+    }
+  }
+
+  // rotate selection
+  public static void rotate()
+  {
+    int i, j;
+    findCenter();
+
+    for(i = 0; i < board.max; i++)
+    {
+      Trace trace = board.trace[i];
+      Pad pad = board.pad[i];
+
+      if(trace.selected)
+      {
+        for(j = 0; j < trace.length; j++)
+        {
+          double x = trace.x[j];
+          double y = trace.y[j];
+          double gx = centerx + (x - centerx) * Math.cos(angle)
+                               - (y - centery) * Math.sin(angle);
+          double gy = centery + (x - centerx) * Math.sin(angle)
+                               + (y - centery) * Math.cos(angle);
+          trace.x[j] = (float)((int)((gx + .0125) * 40)) / 40;
+          trace.y[j] = (float)((int)((gy + .0125) * 40)) / 40;
+        }
+      }
+      if(pad.selected)
+      {
+        double x = pad.x;
+        double y = pad.y;
+        double gx = centerx + (x - centerx) * Math.cos(angle)
+                               - (y - centery) * Math.sin(angle);
+        double gy = centery + (x - centerx) * Math.sin(angle)
+                               - (y - centery) * Math.cos(angle);
+        pad.x = (float)((int)((gx + .0125) * 40)) / 40;
+        pad.y = (float)((int)((gy + .0125) * 40)) / 40;
+      }
+    }
+
+    panel.repaint();
+  }
+
+  // flip selection
+  public static void flip()
+  {
+    int i, j;
+    findCenter();
+
+    for(i = 0; i < board.max; i++)
+    {
+      Trace trace = board.trace[i];
+      Pad pad = board.pad[i];
+
+      if(trace.selected)
+      {
+        for(j = 0; j < trace.length; j++)
+        {
+          trace.x[j] = centerx - (trace.x[j] - centerx);
+        }
+      }
+      if(pad.selected)
+      {
+        pad.x = centerx - (pad.x - centerx);
+      }
+    }
+
+    panel.repaint();
+  }
+
+  // mirror selection
+  public static void mirror()
+  {
+    int i, j;
+    findCenter();
+
+    for(i = 0; i < board.max; i++)
+    {
+      Trace trace = board.trace[i];
+      Pad pad = board.pad[i];
+
+      if(trace.selected)
+      {
+        for(j = 0; j < trace.length; j++)
+        {
+          trace.y[j] = centery - (trace.y[j] - centery);
+        }
+      }
+      if(pad.selected)
+      {
+        pad.y = centery - (pad.y - centery);
+      }
+    }
+
+    panel.repaint();
+  }
+
   // quit
   public static void quit() 
   {
@@ -99,7 +241,7 @@ public class SimplePCB
   {
     try
     {
-      Thread.sleep(50);
+      Thread.sleep(16);
     }
     catch(InterruptedException e)
     {
@@ -110,7 +252,7 @@ public class SimplePCB
   public static void setToolMode(int mode)
   {
     toolMode = mode;
-    cancelSelection();
+    //cancelSelection();
     panel.repaint();
   }
 

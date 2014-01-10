@@ -76,7 +76,7 @@ public class MainMenu extends JMenuBar
 
     add(fileMenu);
 
-    // Edit menu
+    // edit menu
     JMenu editMenu = new JMenu("Edit");
 
     JMenuItem duplicateItem = new JMenuItem("Duplicate");
@@ -138,20 +138,45 @@ public class MainMenu extends JMenuBar
 
     add(editMenu);
 
-    // view menu
-/*
-    JMenu viewMenu = new JMenu("View");
+    // transform menu
+    JMenu transformMenu = new JMenu("Transform");
 
-    JCheckBoxMenuItem yellow = new JCheckBoxMenuItem("Graphics", true);
-    JCheckBoxMenuItem red = new JCheckBoxMenuItem("Top Traces", true);
-    JCheckBoxMenuItem green = new JCheckBoxMenuItem("Bottom Traces", true);
+    JMenuItem rotateItem = new JMenuItem("Rotate");
+    rotateItem.addActionListener(
+      new ActionListener()
+      {
+        public void actionPerformed(ActionEvent e)
+        {
+          SimplePCB.rotate();
+        }
+      } );
 
-    viewMenu.add(yellow);
-    viewMenu.add(red);
-    viewMenu.add(green);
+    JMenuItem flipItem = new JMenuItem("Flip");
+    flipItem.addActionListener(
+      new ActionListener()
+      {
+        public void actionPerformed(ActionEvent e)
+        {
+          SimplePCB.flip();
+        }
+      } );
 
-    add(viewMenu);
-*/
+    JMenuItem mirrorItem = new JMenuItem("Mirror");
+    mirrorItem.addActionListener(
+      new ActionListener()
+      {
+        public void actionPerformed(ActionEvent e)
+        {
+          SimplePCB.mirror();
+        }
+      } );
+
+    transformMenu.add(rotateItem);
+    transformMenu.add(flipItem);
+    transformMenu.add(mirrorItem);
+
+    add(transformMenu);
+
     // help menu
     JMenu helpMenu = new JMenu("Help");
 
