@@ -237,7 +237,7 @@ public class SimplePCB
   }
 
   // sleep
-  private static void sleep()
+  public static void sleep()
   {
     try
     {
