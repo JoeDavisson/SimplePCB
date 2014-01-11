@@ -582,10 +582,15 @@ public class SimplePCB
       if(input.wheelup)
       {
         input.wheelup = false;
+        double oldzoom = zoom;
         zoom += 100;
 
-        if(zoom > (100 * 8))
-          zoom = (100 * 8);
+        if(zoom > (100 * 16))
+          zoom = (100 * 16);
+
+        double zoomlevel = (double)zoom / oldzoom;
+        ox -= (int)((double)(mousex - ox) * (zoomlevel - 1)); 
+        oy -= (int)((double)(mousey - oy) * (zoomlevel - 1)); 
 
         panel.repaint();
         continue;
@@ -595,10 +600,15 @@ public class SimplePCB
       if(input.wheeldown)
       {
         input.wheeldown = false;
+        double oldzoom = zoom;
         zoom -= 100;
 
         if(zoom < 100)
           zoom = 100;
+
+        double zoomlevel = (double)zoom / oldzoom;
+        ox -= (int)((double)(mousex - ox) * (zoomlevel - 1)); 
+        oy -= (int)((double)(mousey - oy) * (zoomlevel - 1)); 
 
         panel.repaint();
         continue;
