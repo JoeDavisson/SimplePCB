@@ -42,7 +42,7 @@ public class SimplePCB
 
   public static Board board = null;
 
-  public static int zoom = 100;
+  public static int zoom = Grid.mag;
   public static Trace currentTrace = null;
   public static Pad selectedPad = null;
   public static Trace selectedTrace = null;
@@ -252,7 +252,7 @@ public class SimplePCB
   public static void setToolMode(int mode)
   {
     toolMode = mode;
-    //cancelSelection();
+    currentTrace = null;
     panel.repaint();
   }
 
@@ -263,8 +263,8 @@ public class SimplePCB
     mousey = input.mousey;
     x = (double)(mousex - ox) / zoom;
     y = (double)(mousey - oy) / zoom;
-    gridx = (float)((int)((x + .0125) * 40)) / 40;
-    gridy = (float)((int)((y + .0125) * 40)) / 40;
+    gridx = Grid.snap(x);
+    gridy = Grid.snap(y);
   }
 
   // point on line test
@@ -377,6 +377,7 @@ public class SimplePCB
     }
 
     selectionStarted = false;
+    currentTrace = null;
   }
 
   // finish group
@@ -471,8 +472,11 @@ public class SimplePCB
     // mouse input
     input = new Input();
 
+    // default grid
+    Grid.setInches(.025);
+
     // pcb board outline
-    board = new Board(6.0, 4.0);
+    board = new Board(3.0 * 25.4, 2.0 * 25.4);
 
     // create window
     JFrame frame = new JFrame("SimplePCB");
@@ -583,10 +587,10 @@ public class SimplePCB
       {
         input.wheelup = false;
         double oldzoom = zoom;
-        zoom += 100;
+        zoom += Grid.mag;
 
-        if(zoom > (100 * 16))
-          zoom = (100 * 16);
+        if(zoom > (Grid.mag * 16))
+          zoom = (Grid.mag * 16);
 
         double zoomlevel = (double)zoom / oldzoom;
         ox -= (int)((double)(mousex - ox) * (zoomlevel - 1)); 
@@ -601,10 +605,10 @@ public class SimplePCB
       {
         input.wheeldown = false;
         double oldzoom = zoom;
-        zoom -= 100;
+        zoom -= Grid.mag;
 
-        if(zoom < 100)
-          zoom = 100;
+        if(zoom < Grid.mag)
+          zoom = Grid.mag;
 
         double zoomlevel = (double)zoom / oldzoom;
         ox -= (int)((double)(mousex - ox) * (zoomlevel - 1)); 
@@ -688,7 +692,7 @@ public class SimplePCB
                 double y1 = selectedTrace.y[i];
                 double y2 = selectedTrace.y[i - 1];
 
-                if(pointOnLine(x, y, x1, y1, x2, y2, .025))
+                if(pointOnLine(x, y, x1, y1, x2, y2, 1.0))
                 {
                   selectedTrace.insert(i, gridx, gridy);
                   selectedTrace.selectedVertex = i;
@@ -704,7 +708,7 @@ public class SimplePCB
                 double y1 = selectedTrace.y[0];
                 double y2 = selectedTrace.y[selectedTrace.length - 1];
 
-                if(pointOnLine(x, y, x1, y1, x2, y2, .025))
+                if(pointOnLine(x, y, x1, y1, x2, y2, 1.0))
                 {
                   selectedTrace.insert(i, gridx, gridy);
                   selectedTrace.selectedVertex = i;
@@ -948,7 +952,7 @@ public class SimplePCB
             {
               for(i = 0; i < selectedTrace.length; i++)
               {
-                if(pointInCircle(x - selectedTrace.x[i], y - selectedTrace.y[i], 0.025))
+                if(pointInCircle(x - selectedTrace.x[i], y - selectedTrace.y[i], 0.5))
                 {
                   selectedTrace.selectedVertex = i;
 

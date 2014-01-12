@@ -91,17 +91,17 @@ public class RenderPanel extends JPanel
         {
           if(i == trace.selectedVertex)
           {
-            g.fill(new Rectangle2D.Double(ox + (trace.x[i] * zoom) - 1.5 * zoom / 100,
-                       oy + (trace.y[i] * zoom) - 1.5 * zoom / 100,
-                       (3 * zoom) / 100,
-                       (3 * zoom) / 100));
+            g.fill(new Rectangle2D.Double(ox + (trace.x[i] * zoom) - 3 * zoom / Grid.mag,
+                       oy + (trace.y[i] * zoom) - 3 * zoom / Grid.mag,
+                       (6 * zoom) / Grid.mag,
+                       (6 * zoom) / Grid.mag));
           }
           else
           {
-            g.fill(new Rectangle2D.Double(ox + (trace.x[i] * zoom) - zoom / 100,
-                       oy + (trace.y[i] * zoom) - zoom / 100,
-                       (2 * zoom) / 100,
-                       (2 * zoom) / 100));
+            g.fill(new Rectangle2D.Double(ox + (trace.x[i] * zoom) - 2 * zoom / Grid.mag,
+                       oy + (trace.y[i] * zoom) - 2 * zoom / Grid.mag,
+                       (4 * zoom) / Grid.mag,
+                       (4 * zoom) / Grid.mag));
           }
         }
       }
@@ -125,7 +125,7 @@ public class RenderPanel extends JPanel
     g.fill(new Ellipse2D.Double(ox + ((xx - w2 / 2.0) * zoom), oy + ((yy - w2 / 2.0) * zoom), (w2 * zoom), (w2 * zoom)));
   }
 
-  private void draw_board(Graphics2D g, Board board, Color color)
+  private void drawBoard(Graphics2D g, Board board, Color color)
   {
     g.setStroke(new BasicStroke((float)2.0));
     g.setColor(color);
@@ -135,22 +135,61 @@ public class RenderPanel extends JPanel
   private void drawGrid(Graphics2D g, int w, int h)
   {
     int x, y;
-    w = ((w + zoom) / zoom) * zoom;
-    h = ((h + zoom) / zoom) * zoom;
-    int fix = zoom * 100;
+    int step = (int)(Grid.inc * 256 * zoom);
+    int gray = 64 + (zoom / Grid.mag) * 4;
 
-    // draw grid
+    g.setColor(new Color(gray, gray, gray, 128));
     g.setStroke(new BasicStroke((float)1.0));
-    g.setXORMode(Color.WHITE);
 
-    g.setColor(new Color(192, 192, 192));
-    for(x = 0; x < w; x += zoom / 10)
-      g.draw(new Line2D.Double((x + ox + fix) % w, 0, (x + ox + fix) % w, h));
-    for(y = 0; y < h; y += zoom / 10)
-      g.draw(new Line2D.Double(0, (y + oy + fix) % h, w, (y + oy + fix) % h));
+    int gw = (int)(Grid.snap((double)w / zoom) * 256 * zoom);
+    int gh = (int)(Grid.snap((double)h / zoom) * 256 * zoom);
 
-    g.setPaintMode();
+    gw = ((gw / step) * Grid.line) * (step * Grid.line);
+    gh = ((gh / step) * Grid.line) * (step * Grid.line);
+
+    for(x = 0; x < gw / step; x += Grid.line)
+    {
+      int gx = (ox * 256) + x * step;
+      gx = (gx % gw + gw) % gw;
+      g.draw(new Line2D.Double(gx / 256, 0, gx / 256, h));
+    }
+
+    for(y = 0; y < gh / step; y += Grid.line)
+    {
+      int gy = (oy * 256) + y * step;
+      gy = (gy % gh + gh) % gh;
+      g.draw(new Line2D.Double(0, gy / 256, w, gy / 256));
+    }
   }
+
+/*
+  private void drawGrid(Graphics2D g, int w, int h)
+  {
+    int x, y;
+    double step = Grid.inc * zoom;
+    int gray = 64 + (zoom / Grid.mag) * 4;
+
+    g.setColor(new Color(gray, gray, gray));
+    g.setStroke(new BasicStroke((float)1.0));
+
+    double gw = Grid.snap((double)w / zoom) * zoom;
+    double gh = Grid.snap((double)h / zoom) * zoom;
+
+    for(x = 0; x < gw / step; x++)
+    {
+      double gx = ox + (double)x * step;
+      gx = (gx % gw + gw) % gw;
+      g.draw(new Line2D.Double(gx, 0, gx, h));
+    }
+
+    for(y = 0; y < gh / step; y++)
+    {
+      double gy = oy + (double)y * step;
+      gy = (gy % gh + gh) % gh;
+      g.draw(new Line2D.Double(0, gy, w, gy));
+    }
+  }
+*/
 
   public void drawSegmentPreview(Graphics2D g, Color color)
   {
@@ -223,7 +262,7 @@ public class RenderPanel extends JPanel
     g.fillRect(0, 0, w, h);
 
     // render board
-    draw_board(g, SimplePCB.board, new Color(255, 255, 0));
+    drawBoard(g, SimplePCB.board, new Color(255, 255, 0));
 
     int i;
     Board board = SimplePCB.board;
