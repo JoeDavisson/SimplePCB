@@ -23,41 +23,74 @@ import java.awt.event.*;
 import javax.swing.*;
 import javax.swing.text.*;
 
-public class PadSizeDialog extends JDialog
+public class GridDialog extends JDialog
 {
-  public JTextField padInnerSizeField;
-  public JTextField padOuterSizeField;
+  public JTextField spacingField;
+  public JTextField lineField;
+  public JRadioButton mmButton;
+  public JRadioButton inchesButton;
 
   // ok/cancel
   public JButton okButton;
   public JButton cancelButton;
 
-  public PadSizeDialog(Window owner)
+  public GridDialog(Window owner)
   {
-    super(owner, "Pad Size");
+    super(owner, "Grid");
 
     // main window
     setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
     setLayout(new BorderLayout());
 
     // panels
-    JPanel topPanel = new JPanel(new GridLayout(2, 1, 0, 0));
+    JPanel topPanel = new JPanel(new GridLayout(4, 1, 0, 0));
     JPanel buttonFlowPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
     JPanel buttonGridPanel = new JPanel(new GridLayout(1, 2, 8, 0));
 
-    // pad inner size
-    topPanel.add(new JLabel("Inner Size"));
-    padInnerSizeField = new JTextField(8);
-    padInnerSizeField.setEditable(true);
-    padInnerSizeField.setText(Double.toString(SimplePCB.padInnerSize));
-    topPanel.add(padInnerSizeField);
+    // grid spacing
+    topPanel.add(new JLabel("Spacing"));
+    spacingField = new JTextField(6);
+    spacingField.setEditable(true);
+    if(Grid.inches)
+      spacingField.setText(Double.toString(Grid.inc / 25.4));
+    else
+      spacingField.setText(Double.toString(Grid.inc));
+    topPanel.add(spacingField);
 
-    // pad outer size
-    topPanel.add(new JLabel("Outer Size"));
-    padOuterSizeField = new JTextField(8);
-    padOuterSizeField.setEditable(true);
-    padOuterSizeField.setText(Double.toString(SimplePCB.padOuterSize));
-    topPanel.add(padOuterSizeField);
+    // grid line
+    topPanel.add(new JLabel("Line Every"));
+    lineField = new JTextField(3);
+    lineField.setEditable(true);
+    lineField.setText(Integer.toString(Grid.line));
+    topPanel.add(lineField);
+
+    // mm
+    mmButton = new JRadioButton("Millimeters", !Grid.inches);
+    mmButton.addActionListener(
+      new ActionListener()
+      {
+        public void actionPerformed(ActionEvent e)
+        {
+          Grid.inches = false;
+        }
+      } );
+
+    // inches
+    inchesButton = new JRadioButton("Inches", Grid.inches);
+    inchesButton.addActionListener(
+      new ActionListener()
+      {
+        public void actionPerformed(ActionEvent e)
+        {
+          Grid.inches = true;
+        }
+      } );
+
+    ButtonGroup unitGroup = new ButtonGroup();
+    unitGroup.add(mmButton);
+    unitGroup.add(inchesButton);
+    topPanel.add(mmButton);
+    topPanel.add(inchesButton);
 
     // ok button
     okButton = new JButton("OK");
@@ -66,30 +99,27 @@ public class PadSizeDialog extends JDialog
       {
         public void actionPerformed(ActionEvent e)
         {
-          SimplePCB.padInnerSize = Double.parseDouble(padInnerSizeField.getText());
+          
+          if(Grid.inches)
+            Grid.setInches(Double.parseDouble(spacingField.getText()));
+          else
+            Grid.setMetric(Double.parseDouble(spacingField.getText()));
 
-          if(SimplePCB.padInnerSize > 5)
-          {
-            SimplePCB.padInnerSize = 5;
-          }
+          if(Grid.inc > 10)
+            Grid.inc = 10;
 
-          if(SimplePCB.padInnerSize < .01)
-          {
-            SimplePCB.padInnerSize = .01;
-          }
+          if(Grid.inc < .01)
+            Grid.inc = .01;
 
-          SimplePCB.padOuterSize = Double.parseDouble(padOuterSizeField.getText());
+          Grid.line = Integer.parseInt(lineField.getText());
 
-          if(SimplePCB.padOuterSize > 5)
-          {
-            SimplePCB.padOuterSize = 5;
-          }
+          if(Grid.line > 10)
+            Grid.line = 10;
 
-          if(SimplePCB.padOuterSize < SimplePCB.padInnerSize)
-          {
-            SimplePCB.padOuterSize = SimplePCB.padInnerSize * 2;
-          }
+          if(Grid.line < 1)
+            Grid.line = 1;
 
+          SimplePCB.panel.repaint();
           dispose();
         }
       } );

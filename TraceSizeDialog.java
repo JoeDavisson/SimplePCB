@@ -60,9 +60,9 @@ public class TraceSizeDialog extends JDialog
         {
           SimplePCB.traceSize = Double.parseDouble(traceSizeField.getText());
 
-          if(SimplePCB.traceSize > 1.0)
+          if(SimplePCB.traceSize > 5.0)
           {
-            SimplePCB.traceSize = 1.0;
+            SimplePCB.traceSize = 5.0;
           }
 
           if(SimplePCB.traceSize < .01)

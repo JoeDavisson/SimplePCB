@@ -553,6 +553,7 @@ public class SimplePCB
                 selectedPad.status = false;
               }
 
+              unselectAll();
               break;
             case 1:
             case 4:

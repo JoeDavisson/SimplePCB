@@ -128,6 +128,16 @@ public class MainMenu extends JMenuBar
         }
       } );
 
+    JMenuItem gridItem = new JMenuItem("Grid...");
+    gridItem.addActionListener(
+      new ActionListener()
+      {
+        public void actionPerformed(ActionEvent e)
+        {
+          new GridDialog(SimplePCB.win);
+        }
+      } );
+
     editMenu.add(duplicateItem);
     editMenu.addSeparator();
     editMenu.add(groupItem);
@@ -135,6 +145,8 @@ public class MainMenu extends JMenuBar
     editMenu.addSeparator();
     editMenu.add(padSizeItem);
     editMenu.add(traceSizeItem);
+    editMenu.addSeparator();
+    editMenu.add(gridItem);
 
     add(editMenu);
 
