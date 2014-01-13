@@ -156,8 +156,8 @@ public class SimplePCB
                                - (y - centery) * Math.sin(angle);
           double gy = centery + (x - centerx) * Math.sin(angle)
                                + (y - centery) * Math.cos(angle);
-          trace.x[j] = (float)((int)((gx + .0125) * 40)) / 40;
-          trace.y[j] = (float)((int)((gy + .0125) * 40)) / 40;
+          trace.x[j] = Grid.snap(gx);
+          trace.y[j] = Grid.snap(gy);
         }
       }
       if(pad.selected)
@@ -168,8 +168,8 @@ public class SimplePCB
                                - (y - centery) * Math.sin(angle);
         double gy = centery + (x - centerx) * Math.sin(angle)
                                - (y - centery) * Math.cos(angle);
-        pad.x = (float)((int)((gx + .0125) * 40)) / 40;
-        pad.y = (float)((int)((gy + .0125) * 40)) / 40;
+        pad.x = Grid.snap(gx);
+        pad.y = Grid.snap(gy);
       }
     }
 
@@ -658,19 +658,21 @@ public class SimplePCB
           input.button3 = false;
 
           // turn completed trace off if no length
-          if(currentTrace.length < 2)
+          if( (currentTrace.filled && currentTrace.length < 3)
+           || (!currentTrace.filled && currentTrace.length < 2) )
           {
+            selectedTrace = null;
             currentTrace.length = 0;
             currentTrace.status = false;
             currentTrace.group = -1;
-            selectedTrace = null;
+            currentTrace = null;
           }
           else
           {
-            selectedTrace = currentTrace;
+            selectedTrace = null;
+            currentTrace = null;
           }
 
-          currentTrace = null;
           panel.repaint();
         }
         continue;
@@ -937,11 +939,6 @@ public class SimplePCB
             }
             else
             {
-  /*            if(selectedTrace != null)
-                selectedTrace.selected = true;
-              if(selectedPad != null)
-                selectedPad.selected = true;
-*/
               moveGroup();
             }
 

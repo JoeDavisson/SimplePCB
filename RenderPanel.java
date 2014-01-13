@@ -302,7 +302,8 @@ public class RenderPanel extends JPanel
 
     // trace highlight & handles
     for(i = 0; i < board.max; i++)
-      highlightTrace(g, board.trace[i]);
+      if(board.trace[i].status)
+        highlightTrace(g, board.trace[i]);
 
     // grid
     drawGrid(g, w, h);
