@@ -1,3 +1,5 @@
+import java.io.*;
+
 public class Board
 {
   int max = 4096;
@@ -79,15 +81,189 @@ public class Board
     return trace[use];
   }
 
-/*
-  public void addGroup()
+  public void save(File file)
   {
-    group[group_count] = new Group();
-    group_count++;
+    int i, j;
 
-    if(group_count > max - 1)
-      group_count = max - 1;
+    if(file == null)
+      return;
+
+    // open file
+    FileIO.open(file, true);
+
+    // write board size
+    FileIO.writeString("size");
+    FileIO.writeFloat(w);
+    FileIO.writeFloat(h);
+    FileIO.writeString("");
+
+    // write pads
+    for(i = 0; i < max; i++)
+    {
+      if(pad[i].status)
+      {
+        FileIO.writeString("pad");
+        FileIO.writeInt(pad[i].group);
+        FileIO.writeFloat(pad[i].x);
+        FileIO.writeFloat(pad[i].y);
+        FileIO.writeFloat(pad[i].innerSize);
+        FileIO.writeFloat(pad[i].outerSize);
+        FileIO.writeString("");
+      }
+    }
+  
+    // write traces
+    for(i = 0; i < max; i++)
+    {
+      if(trace[i].status)
+      {
+        FileIO.writeString("trace");
+        FileIO.writeInt(trace[i].group);
+        FileIO.writeInt(trace[i].layer);
+        FileIO.writeInt(trace[i].filled ? 1 : 0);
+        FileIO.writeFloat(trace[i].size);
+        for(j = 0; j < trace[i].length; j++)
+        {
+          FileIO.writeFloat(trace[i].x[j]);
+          FileIO.writeFloat(trace[i].y[j]);
+        }
+        FileIO.writeString("end");
+        FileIO.writeString("");
+      }
+    }
+
+    // close file
+    FileIO.close();
   }
-*/
+
+  public void load(File file)
+  {
+    int i, j;
+    String s;
+    int padCount = 0;
+    int traceCount = 0;
+
+    if(file == null)
+      return;
+
+    // clear
+    w = 2;
+    h = 2;
+    for(i = 0; i < max; i++)
+    {
+      pad[i].status = false;
+      pad[i].selected = false;
+      trace[i].status = false;
+      trace[i].selected = false;
+      trace[i].selectedVertex = 0;
+    }
+
+    // open file
+    FileIO.open(file, false);
+
+    // read lines
+    while(true)
+    {
+      s = FileIO.readLine();
+      if(s == null)
+        break;
+
+      // board size
+      if(s.equals("size"))
+      {
+        s = FileIO.readLine();
+        if(s == null)
+          break;
+        w = Double.parseDouble(s);
+
+        s = FileIO.readLine();
+        if(s == null)
+          break;
+        h = Double.parseDouble(s);
+      }
+
+      // pad
+      if(s.equals("pad"))
+      {
+        pad[padCount].status = true;
+
+        s = FileIO.readLine();
+        if(s == null)
+          break;
+        pad[padCount].group = Integer.parseInt(s);
+
+        s = FileIO.readLine();
+        if(s == null)
+          break;
+        pad[padCount].x = Double.parseDouble(s);
+
+        s = FileIO.readLine();
+        if(s == null)
+          break;
+        pad[padCount].y = Double.parseDouble(s);
+
+        s = FileIO.readLine();
+        if(s == null)
+          break;
+        pad[padCount].innerSize = Double.parseDouble(s);
+
+        s = FileIO.readLine();
+        if(s == null)
+          break;
+        pad[padCount].outerSize = Double.parseDouble(s);
+
+        padCount++;
+      }
+
+      // trace
+      if(s.equals("trace"))
+      {
+        trace[traceCount].status = true;
+        j = 0;
+
+        s = FileIO.readLine();
+        if(s == null)
+          break;
+        trace[traceCount].group = Integer.parseInt(s);
+
+        s = FileIO.readLine();
+        if(s == null)
+          break;
+        trace[traceCount].layer = Integer.parseInt(s);
+
+        s = FileIO.readLine();
+        if(s == null)
+          break;
+        trace[traceCount].filled = Integer.parseInt(s) > 0 ? true : false;
+
+        s = FileIO.readLine();
+        if(s == null)
+          break;
+        trace[traceCount].size = Double.parseDouble(s);
+
+        while(true)
+        {
+          s = FileIO.readLine();
+          if(s.equals("end"))
+            break;
+          if(s == null)
+            break;
+          trace[traceCount].x[j] = Double.parseDouble(s);
+
+          s = FileIO.readLine();
+          if(s.equals("end"))
+            break;
+          if(s == null)
+            break;
+          trace[traceCount].y[j] = Double.parseDouble(s);
+
+          j++;
+        }
+
+        trace[traceCount].length = j;
+        traceCount++;
+      }
+    }
+  }
 }
 

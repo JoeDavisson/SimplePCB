@@ -2,47 +2,27 @@ import java.io.*;
 
 public class Gerber
 {
-  private static FileWriter fw;
-  private static BufferedWriter bw;
-
-  private static void print(String s)
-  {
-    System.out.println(s); 
-
-    try
-    {
-      bw.write(s + "\n");
-    }
-    catch(IOException e)
-    {
-    }
-  }
-
   public static void save(Board board, File file, int layer)
   {
     int i, j;
 
+    if(file == null)
+      return;
+
     // open file
-    try
-    {
-      fw = new FileWriter(file.getAbsoluteFile());
-      bw = new BufferedWriter(fw);
-    }
-    catch(IOException e)
-    {
-    }
+    FileIO.open(file, true);
 
     // header
     if(layer == 2)
-      print("G04 Bottom Copper Layer*");
+      FileIO.writeString("G04 Bottom Copper Layer*");
     if(layer == 1)
-      print("G04 Top Copper Layer*");
+      FileIO.writeString("G04 Top Copper Layer*");
     if(layer == 0)
-      print("G04 Artwork Layer*");
-    print("%FSLAX26Y26*%");
-    print("%MOIN*%");
-    print("%IPPOS*%");
-    print("");
+      FileIO.writeString("G04 Artwork Layer*");
+    FileIO.writeString("%FSLAX26Y26*%");
+    FileIO.writeString("%MOIN*%");
+    FileIO.writeString("%IPPOS*%");
+    FileIO.writeString("");
 
     int pad_id = 0;
     int trace_id = 0;
@@ -115,15 +95,15 @@ public class Gerber
     }
 
     // print aperture pad list
-    print("G04 Pad Aperture List*");
+    FileIO.writeString("G04 Pad Aperture List*");
     for(i = 0; i < pad_id; i++)
-      print("%ADD" + (100 + i) + "C," + padString[i] + "*%");
-    print("");
+      FileIO.writeString("%ADD" + (100 + i) + "C," + padString[i] + "*%");
+    FileIO.writeString("");
 
-    print("G04 Trace Aperture List*");
+    FileIO.writeString("G04 Trace Aperture List*");
     for(i = 0; i < trace_id; i++)
-      print("%ADD" + (200 + i) + "C," + traceString[i] + "*%");
-    print("");
+      FileIO.writeString("%ADD" + (200 + i) + "C," + traceString[i] + "*%");
+    FileIO.writeString("");
 
     // draw traces
     for(i = 0; i < board.max; i++)
@@ -134,21 +114,21 @@ public class Gerber
       {
         if(trace.filled)
         {
-          print("G36*");
-          print(String.format("X%2.6fY%2.6fD02*", trace.x[0], board.h - trace.y[0]).replace(".", ""));
+          FileIO.writeString("G36*");
+          FileIO.writeString(String.format("X%2.6fY%2.6fD02*", trace.x[0], board.h - trace.y[0]).replace(".", ""));
           for(j = 1; j < trace.length; j++)
           {
-            print(String.format("G1X%2.6fY%2.6fD01*", trace.x[j], board.h - trace.y[j]).replace(".", ""));
+            FileIO.writeString(String.format("G1X%2.6fY%2.6fD01*", trace.x[j], board.h - trace.y[j]).replace(".", ""));
           }
-          print("G37*");
+          FileIO.writeString("G37*");
         }
         else
         {
-          print("D" + (200 + trace.id) + "*");
-          print(String.format("X%2.6fY%2.6fD02*", trace.x[0], board.h - trace.y[0]).replace(".", ""));
+          FileIO.writeString("D" + (200 + trace.id) + "*");
+          FileIO.writeString(String.format("X%2.6fY%2.6fD02*", trace.x[0], board.h - trace.y[0]).replace(".", ""));
           for(j = 1; j < trace.length; j++)
           {
-            print(String.format("X%2.6fY%2.6fD01*", trace.x[j], board.h - trace.y[j]).replace(".", ""));
+            FileIO.writeString(String.format("X%2.6fY%2.6fD01*", trace.x[j], board.h - trace.y[j]).replace(".", ""));
           }
         }
       }
@@ -161,23 +141,16 @@ public class Gerber
 
       if(pad.status && layer != 0)
       {
-        print("D" + (100 + pad.id) + "*");
-        print(String.format("X%2.6fY%2.6fD03*", pad.x, board.h - pad.y).replace(".", ""));
+        FileIO.writeString("D" + (100 + pad.id) + "*");
+        FileIO.writeString(String.format("X%2.6fY%2.6fD03*", pad.x, board.h - pad.y).replace(".", ""));
       }
     }
 
     // footer
-    print("G04 End Program*");
-    print("M02*");
+    FileIO.writeString("G04 End Program*");
+    FileIO.writeString("M02*");
 
-    // close file
-    try
-    {
-      bw.close();
-    }
-    catch(IOException e)
-    {
-    }
+    FileIO.close();
   }
 }
 

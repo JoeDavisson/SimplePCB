@@ -12,12 +12,23 @@ public class MainMenu extends JMenuBar
     // file menu
     JMenu fileMenu = new JMenu("File");
 
+    JMenuItem loadItem = new JMenuItem("Load Project...");
+    loadItem.addActionListener(
+      new ActionListener()
+      {
+        public void actionPerformed(ActionEvent e)
+        {
+          SimplePCB.loadProject();
+        }
+      } );
+
     JMenuItem saveItem = new JMenuItem("Save Project...");
     saveItem.addActionListener(
       new ActionListener()
       {
         public void actionPerformed(ActionEvent e)
         {
+          SimplePCB.saveProject();
         }
       } );
 
@@ -69,6 +80,7 @@ public class MainMenu extends JMenuBar
         }
       } );
 
+    fileMenu.add(loadItem);
     fileMenu.add(saveItem);
     fileMenu.add(exportMenu);
     fileMenu.addSeparator();

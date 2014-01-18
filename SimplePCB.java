@@ -74,7 +74,37 @@ public class SimplePCB
       "About", JOptionPane.INFORMATION_MESSAGE);
   }
 
-  // save
+  // load project
+  public static void loadProject() 
+  {
+    final JFileChooser fc = new JFileChooser();
+
+    if(fc.showOpenDialog(win) == JFileChooser.APPROVE_OPTION)
+    {
+      File file = fc.getSelectedFile();
+      board.load(file);
+    }
+  }
+
+  // save project
+  public static void saveProject() 
+  {
+    final JFileChooser fc = new JFileChooser();
+
+    if(fc.showSaveDialog(win) == JFileChooser.APPROVE_OPTION)
+    {
+      File file = fc.getSelectedFile();
+      if(file != null && file.exists())
+      {
+        int response = JOptionPane.showConfirmDialog(win, "\"" + file.getName() + "\" exists, overwrite?", "File Exists", JOptionPane.YES_NO_OPTION);
+        if(response != JOptionPane.YES_OPTION)
+          return;
+      }
+      board.save(file);
+    }
+  }
+
+  // save gerber
   public static void exportLayer(int layer) 
   {
     final JFileChooser fc = new JFileChooser();
