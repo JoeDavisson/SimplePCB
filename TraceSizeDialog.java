@@ -33,7 +33,7 @@ public class TraceSizeDialog extends JDialog
 
   public TraceSizeDialog(Window owner)
   {
-    super(owner, "Trace Size");
+    super(owner, "Custom Trace Size");
 
     // main window
     setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);

@@ -277,7 +277,7 @@ public class RenderPanel extends JPanel
     // green pads
     for(i = 0; i < board.max; i++)
     {
-      if(board.pad[i].status)
+      if(board.pad[i].status && board.pad[i].layer == 2)
         drawPad(g, board.pad[i], new Color(0, 255, 0));
     } 
 
@@ -288,12 +288,26 @@ public class RenderPanel extends JPanel
         drawTrace(g, board.trace[i], new Color(255, 0, 0));
     }
 
+    // red pads
+    for(i = 0; i < board.max; i++)
+    {
+      if(board.pad[i].status && board.pad[i].layer == 1)
+        drawPad(g, board.pad[i], new Color(255, 0, 0));
+    } 
+
     // yellow traces
     for(i = 0; i < board.max; i++)
     {
       if(board.trace[i].status && board.trace[i].layer == 0)
         drawTrace(g, board.trace[i], new Color(255, 255, 0));
     }
+
+    // yellow pads
+    for(i = 0; i < board.max; i++)
+    {
+      if(board.pad[i].status && board.pad[i].layer == 0)
+        drawPad(g, board.pad[i], new Color(255, 255, 0));
+    } 
 
     if(SimplePCB.currentTrace != null)
     {

@@ -1009,7 +1009,7 @@ public class SimplePCB
             break;
           case 2:
             unselectAll();
-            board.addPad(gridx, gridy, padInnerSize, padOuterSize);
+            board.addPad(layers.current, gridx, gridy, padInnerSize, padOuterSize);
             break;
           case 3:
             // new trace
@@ -1017,7 +1017,7 @@ public class SimplePCB
             {
               unselectAll();
               // add first segment
-              currentTrace = board.addTrace(gridx, gridy, traceSize, layers.current, false);
+              currentTrace = board.addTrace(layers.current, gridx, gridy, traceSize, false);
               panel.repaint();
             }
             break;
@@ -1027,7 +1027,7 @@ public class SimplePCB
             {
               unselectAll();
               // add first segment
-              currentTrace = board.addTrace(gridx, gridy, traceSize, layers.current, true);
+              currentTrace = board.addTrace(layers.current, gridx, gridy, traceSize, true);
               panel.repaint();
             }
             break;

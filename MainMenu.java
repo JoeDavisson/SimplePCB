@@ -120,6 +120,16 @@ public class MainMenu extends JMenuBar
         }
       } );
 
+    JMenuItem boardSizeItem = new JMenuItem("Board Size...");
+    boardSizeItem.addActionListener(
+      new ActionListener()
+      {
+        public void actionPerformed(ActionEvent e)
+        {
+          new BoardSizeDialog(SimplePCB.win);
+        }
+      } );
+
     JMenuItem traceSizeItem = new JMenuItem("Custom Trace Size...");
     traceSizeItem.addActionListener(
       new ActionListener()
@@ -155,6 +165,7 @@ public class MainMenu extends JMenuBar
     editMenu.add(groupItem);
     editMenu.add(ungroupItem);
     editMenu.addSeparator();
+    editMenu.add(boardSizeItem);
     editMenu.add(padSizeItem);
     editMenu.add(traceSizeItem);
     editMenu.addSeparator();

@@ -5,13 +5,15 @@ public class Pad
   double innerSize;
   double outerSize;
   boolean status = false;
+  int layer;
   int group = -1;
   boolean selected = false;
   int id = 0;
 
-  Pad(double temp_x, double temp_y,
+  Pad(int temp_layer, double temp_x, double temp_y,
       double temp_innerSize, double temp_outerSize)
   {
+    layer = temp_layer;
     x = temp_x;
     y = temp_y;
     innerSize = temp_innerSize;
@@ -22,6 +24,7 @@ public class Pad
 
   public void copy(Pad pad)
   {
+    layer = pad.layer;
     x = pad.x;
     y = pad.y;
     innerSize = pad.innerSize;
@@ -38,6 +41,5 @@ public class Pad
     else
       return false;
   }
-
 }
 

@@ -12,7 +12,7 @@ public class Trace
   boolean selected = false;
   int id = 0;
 
-  Trace(double temp_size, int temp_layer, boolean temp_filled)
+  Trace(int temp_layer, double temp_size, boolean temp_filled)
   {
     x = new double[64];
     y = new double[64];

@@ -35,33 +35,30 @@ public class Gerber
       traceString[i] = "";
     }
 
-    // assign pad apertures, no pads on artwork layer
-    if(layer != 0)
+    // assign pad apertures
+    for(i = 0; i < board.max; i++)
     {
-      for(i = 0; i < board.max; i++)
+      Pad pad = board.pad[i];
+
+      if(pad.status && pad.layer == layer)
       {
-        Pad pad = board.pad[i];
-
-        if(pad.status && layer != 0)
+        String temp = String.format("%2.6fX%2.6f", pad.outerSize, pad.innerSize);
+        int use = -1;
+        for(j = 0; j < pad_id; j++)
         {
-          String temp = String.format("%2.6fX%2.6f", pad.outerSize, pad.innerSize);
-          int use = -1;
-          for(j = 0; j < pad_id; j++)
+          if(padString[j].equals(temp))
           {
-            if(padString[j].equals(temp))
-            {
-              use = j;
-              pad.id = use;
-              break;
-            } 
-          }
+            use = j;
+            pad.id = use;
+            break;
+          } 
+        }
 
-          if(use == -1)
-          {
-            padString[pad_id] = temp;
-            pad.id = pad_id;
-            pad_id++;
-          }
+        if(use == -1)
+        {
+          padString[pad_id] = temp;
+          pad.id = pad_id;
+          pad_id++;
         }
       }
     }
@@ -139,7 +136,7 @@ public class Gerber
     {
       Pad pad = board.pad[i];
 
-      if(pad.status && layer != 0)
+      if(pad.status && pad.layer == layer)
       {
         FileIO.writeString("D" + (100 + pad.id) + "*");
         FileIO.writeString(String.format("X%2.6fY%2.6fD03*", pad.x, board.h - pad.y).replace(".", ""));
@@ -150,6 +147,7 @@ public class Gerber
     FileIO.writeString("G04 End Program*");
     FileIO.writeString("M02*");
 
+    // close file
     FileIO.close();
   }
 }

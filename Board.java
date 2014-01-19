@@ -27,11 +27,11 @@ public class Board
     for(i = 0; i < max; i++)
     {
       trace[i] = new Trace(0, 0, false);
-      pad[i] = new Pad(0, 0, 0, 0);
+      pad[i] = new Pad(0, 0, 0, 0, 0);
     }
   }
 
-  public void addPad(double x, double y, double innerSize, double outerSize)
+  public void addPad(int layer, double x, double y, double innerSize, double outerSize)
   {
     int i;
     int use = -1;
@@ -48,6 +48,7 @@ public class Board
     if(use == -1)
       return;
 
+    pad[use].layer = layer;
     pad[use].x = x;
     pad[use].y = y;
     pad[use].innerSize = innerSize;
@@ -55,7 +56,7 @@ public class Board
     pad[use].status = true;
   }
 
-  public Trace addTrace(double x, double y, double size, int layer, boolean filled)
+  public Trace addTrace(int layer, double x, double y, double size, boolean filled)
   {
     int i;
     int use = -1;
@@ -72,9 +73,9 @@ public class Board
     if(use == -1)
       return trace[0];
 
+    trace[use].layer = layer;
     trace[use].size = size;
     trace[use].add(x, y);
-    trace[use].layer = layer;
     trace[use].filled = filled;
     trace[use].status = true;
 
@@ -103,6 +104,7 @@ public class Board
       if(pad[i].status)
       {
         FileIO.writeString("pad");
+        FileIO.writeInt(pad[i].layer);
         FileIO.writeInt(pad[i].group);
         FileIO.writeFloat(pad[i].x);
         FileIO.writeFloat(pad[i].y);
@@ -118,8 +120,8 @@ public class Board
       if(trace[i].status)
       {
         FileIO.writeString("trace");
-        FileIO.writeInt(trace[i].group);
         FileIO.writeInt(trace[i].layer);
+        FileIO.writeInt(trace[i].group);
         FileIO.writeInt(trace[i].filled ? 1 : 0);
         FileIO.writeFloat(trace[i].size);
         for(j = 0; j < trace[i].length; j++)
@@ -134,6 +136,8 @@ public class Board
 
     // close file
     FileIO.close();
+
+    SimplePCB.panel.repaint();
   }
 
   public void load(File file)
@@ -190,6 +194,11 @@ public class Board
         s = FileIO.readLine();
         if(s == null)
           break;
+        pad[padCount].layer = Integer.parseInt(s);
+
+        s = FileIO.readLine();
+        if(s == null)
+          break;
         pad[padCount].group = Integer.parseInt(s);
 
         s = FileIO.readLine();
@@ -224,12 +233,12 @@ public class Board
         s = FileIO.readLine();
         if(s == null)
           break;
-        trace[traceCount].group = Integer.parseInt(s);
+        trace[traceCount].layer = Integer.parseInt(s);
 
         s = FileIO.readLine();
         if(s == null)
           break;
-        trace[traceCount].layer = Integer.parseInt(s);
+        trace[traceCount].group = Integer.parseInt(s);
 
         s = FileIO.readLine();
         if(s == null)
@@ -264,6 +273,11 @@ public class Board
         traceCount++;
       }
     }
+
+    // close file
+    FileIO.close();
+
+    SimplePCB.panel.repaint();
   }
 }
 

@@ -8,72 +8,84 @@ public class TopBar extends JToolBar
 {
   String traceSizeStrings[] =
   {
-    ".25 mm (.01 inches)",
-    ".50 mm (.02 inches)",
-    ".75 mm (.03 inches)",
-    "1.0 mm (.04 inches)",
-    "1.25 mm (.05 inches)",
-    "1.5 mm (.06 inches)",
-    "2.0 mm (.08 inches)",
-    "3.0 mm (.1 inches)",
-    "4.0 mm (.15 inches)",
-    "5.0 mm (.2 inches)",
-    "6.0 mm (.25 inches)",
-    "7.0 mm (.275 inches)",
-    "8.0 mm (.3 inches)",
-    "9.0 mm (.35 inches)",
-    "10.0 mm (.4 inches)"
+    ".4 mm (~.015\")",
+    ".6 mm (~.025\")",
+    ".8 mm (~.03\")",
+    "1.0 mm (~.04\")",
+    "1.2 mm",
+    "1.4 mm (~.06\")",
+    "1.6 mm",
+    "1.8 mm",
+    "2.0 mm (~.08\")",
+    "2.2 mm",
+    "2.4 mm (~.1\")",
+    "2.6 mm",
+    "2.8 mm",
+    "3.0 mm",
+    "3.2 mm (~.12\")",
+    "3.4 mm",
+    "3.6 mm (~.14\")",
+    "3.8 mm",
+    "4.0 mm (~.16\")"
+  };
+ 
+  double traceSize[] =
+  {
+    .4,
+    .6,
+    .8,
+    1.0,
+    1.2,
+    1.4,
+    1.6,
+    1.8,
+    2.0,
+    2.2,
+    2.4,
+    2.6,
+    2.8,
+    3.0,
+    3.2,
+    3.4,
+    3.6,
+    3.8,
+    4.0
   };
 
   String padSizeStrings[] =
   {
-    ".2548 mm (30 AWG)",
-    ".3211 mm (28 AWG)",
-    ".4049 mm (26 AWG)",
-    ".5105 mm (24 AWG)",
-    ".6439 mm (22 AWG)",
-    ".8118 mm (20 AWG)",
-    "1.024 mm (18 AWG)",
-    "1.291 mm (16 AWG)",
-    "1.628 mm (14 AWG)",
-    "2.053 mm (12 AWG)",
-    "2.588 mm (10 AWG)",
-    "3.264 mm (8 AWG)"
+    ".4 mm (~1/64\")",
+    ".6 mm",
+    ".8 mm (~1/32\")",
+    "1.0 mm",
+    "1.2 mm (~3/64\")",
+    "1.4 mm",
+    "1.6 mm (~1/16\")",
+    "1.8 mm",
+    "2.0 mm (~5/64\")",
+    "2.2 mm",
+    "2.4 mm (~3/32\")",
+    "2.6 mm",
+    "2.8 mm (~7/64\")",
+    "3.0 mm (~1/8\")"
   };
-
-  double traceSize[] =
+ 
+  double padSize[] =
   {
-    .25,
-    .50,
-    .75,
+    .4,
+    .6,
+    .8,
     1.0,
-    1.25,
-    1.5,
+    1.2,
+    1.4,
+    1.6,
+    1.8,
     2.0,
-    3.0,
-    4.0,
-    5.0,
-    6.0,
-    7.0,
-    8.0,
-    9.0,
-    10.0
-  };
-
-  double padInnerSize[] =
-  {
-    .2548,
-    .3211,
-    .4049,
-    .5105,
-    .6439,
-    .8118,
-    1.024,
-    1.291,
-    1.628,
-    2.053,
-    2.588,
-    3.264
+    2.2,
+    2.4,
+    2.6,
+    2.8,
+    3.0
   };
 
   JComboBox traceSizeBox = null;
@@ -86,8 +98,8 @@ public class TopBar extends JToolBar
     setFloatable(false);
 
     traceSizeBox = new JComboBox<String>(traceSizeStrings);
-    traceSizeBox.setToolTipText("Pad Size");
-    traceSizeBox.setSelectedIndex(1);
+    traceSizeBox.setToolTipText("Trace Size");
+    traceSizeBox.setSelectedIndex(0);
     traceSizeBox.addActionListener(
       new ActionListener()
       {
@@ -100,14 +112,14 @@ public class TopBar extends JToolBar
 
     padSizeBox = new JComboBox<String>(padSizeStrings);
     padSizeBox.setToolTipText("Pad Size");
-    padSizeBox.setSelectedIndex(4);
+    padSizeBox.setSelectedIndex(0);
     padSizeBox.addActionListener(
       new ActionListener()
       {
         public void actionPerformed(ActionEvent e)
         {
           int i = padSizeBox.getSelectedIndex();
-          SimplePCB.padInnerSize = padInnerSize[i];
+          SimplePCB.padInnerSize = padSize[i];
           SimplePCB.padOuterSize = SimplePCB.padInnerSize * 2;
         }
       } );
@@ -123,8 +135,12 @@ public class TopBar extends JToolBar
     SimplePCB.traceSize = traceSize[i];
 
     i = padSizeBox.getSelectedIndex();
-    SimplePCB.padInnerSize = padInnerSize[i];
+    SimplePCB.padInnerSize = padSize[i];
     SimplePCB.padOuterSize = SimplePCB.padInnerSize * 2;
+  }
+
+  private void reset()
+  {
   }
 }
 

@@ -34,7 +34,7 @@ public class PadSizeDialog extends JDialog
 
   public PadSizeDialog(Window owner)
   {
-    super(owner, "Pad Size");
+    super(owner, "Custom Pad Size");
 
     // main window
     setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
