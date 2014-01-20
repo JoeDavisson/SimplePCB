@@ -79,7 +79,10 @@ public class FileIO
   {
     try
     {
-      bw.close();
+      if(bw != null)
+        bw.close();
+      if(br != null)
+        br.close();
     }
     catch(IOException e)
     {

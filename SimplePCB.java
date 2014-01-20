@@ -38,8 +38,8 @@ public class SimplePCB
   public static double padInnerSize = .03;
   public static double padOuterSize = .08;
 
+  public static PCBFont font;
   public static Input input;
-
   public static Board board = null;
 
   public static int zoom = Grid.mag;
@@ -499,6 +499,9 @@ public class SimplePCB
   // program entry
   public static void main(String[] args)
   {
+    // load font
+    font = new PCBFont();
+
     // mouse input
     input = new Input();
 

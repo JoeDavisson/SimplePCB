@@ -18,6 +18,40 @@ public class RenderPanel extends JPanel
     setLayout(new BorderLayout());
   }
 
+  private void drawText(Graphics2D g, Text text, Color color)
+  {
+    int i, j;
+    double xpos = text.x;
+    double ypos = text.y;
+
+    double pos = 0;
+
+    double scale = zoom / 5;
+
+    g.setColor(color);
+
+    for(i = 0; i < text.text.length(); i++)
+    {
+      Letter letter = PCBFont.letter[text.text.charAt(i)];
+
+      for(j = 0; j < letter.length; j++)
+      {
+        g.setStroke(new BasicStroke((float)letter.size[j] * zoom / 5,
+                            BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+        double x1 = (double)letter.x1[j];
+        double y1 = (double)letter.y1[j];
+        double x2 = (double)letter.x2[j];
+        double y2 = (double)letter.y2[j];
+
+        g.draw(new Line2D.Double(ox + (xpos + pos + x1) * scale, oy + (ypos + y1) * scale, ox + (xpos + pos + x2) * scale, oy + (ypos + y2) * scale));
+      }
+
+      pos += letter.spacing;
+      pos += letter.spacing;
+      pos += letter.spacing;
+    }
+  }
+
   private void drawTrace(Graphics2D g, Trace trace, Color color)
   {
     int i;
@@ -348,6 +382,10 @@ public class RenderPanel extends JPanel
       g.setStroke(new BasicStroke(2));
       g.draw(new Rectangle2D.Double(x1, y1, x2 - x1, y2 - y1));
     }
+
+    Text tempText = new Text(0, "Hello World!", 12, 1, 2, 2);
+
+    drawText(g, tempText, new Color(255, 255, 255));
   }
 }
 
