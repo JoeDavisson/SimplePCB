@@ -34,21 +34,26 @@ public class RenderPanel extends JPanel
     {
       Letter letter = PCBFont.letter[text.text.charAt(i)];
 
+      double lowest = 0;
+ 
       for(j = 0; j < letter.length; j++)
       {
-        g.setStroke(new BasicStroke((float)letter.size[j] * zoom / 5,
+        g.setStroke(new BasicStroke((float)text.size * zoom,
                             BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
         double x1 = (double)letter.x1[j];
         double y1 = (double)letter.y1[j];
         double x2 = (double)letter.x2[j];
         double y2 = (double)letter.y2[j];
 
+        if(x1 > lowest)
+          lowest = x1;
+        if(x2 > lowest)
+          lowest = x2;
+
         g.draw(new Line2D.Double(ox + (xpos + pos + x1) * scale, oy + (ypos + y1) * scale, ox + (xpos + pos + x2) * scale, oy + (ypos + y2) * scale));
       }
 
-      pos += letter.spacing;
-      pos += letter.spacing;
-      pos += letter.spacing;
+      pos += lowest + letter.spacing;
     }
   }
 
