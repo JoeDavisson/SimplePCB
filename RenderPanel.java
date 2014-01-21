@@ -18,45 +18,6 @@ public class RenderPanel extends JPanel
     setLayout(new BorderLayout());
   }
 
-  private void drawText(Graphics2D g, Text text, Color color)
-  {
-    int i, j;
-    double xpos = text.x;
-    double ypos = text.y;
-
-    double pos = 0;
-
-    double scale = zoom / 5;
-
-    g.setColor(color);
-
-    for(i = 0; i < text.text.length(); i++)
-    {
-      Letter letter = PCBFont.letter[text.text.charAt(i)];
-
-      double lowest = 0;
- 
-      for(j = 0; j < letter.length; j++)
-      {
-        g.setStroke(new BasicStroke((float)text.size * zoom,
-                            BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
-        double x1 = (double)letter.x1[j];
-        double y1 = (double)letter.y1[j];
-        double x2 = (double)letter.x2[j];
-        double y2 = (double)letter.y2[j];
-
-        if(x1 > lowest)
-          lowest = x1;
-        if(x2 > lowest)
-          lowest = x2;
-
-        g.draw(new Line2D.Double(ox + (xpos + pos + x1) * scale, oy + (ypos + y1) * scale, ox + (xpos + pos + x2) * scale, oy + (ypos + y2) * scale));
-      }
-
-      pos += lowest + letter.spacing;
-    }
-  }
-
   private void drawTrace(Graphics2D g, Trace trace, Color color)
   {
     int i;
@@ -200,35 +161,6 @@ public class RenderPanel extends JPanel
       g.draw(new Line2D.Double(0, gy / 256, w, gy / 256));
     }
   }
-
-/*
-  private void drawGrid(Graphics2D g, int w, int h)
-  {
-    int x, y;
-    double step = Grid.inc * zoom;
-    int gray = 64 + (zoom / Grid.mag) * 4;
-
-    g.setColor(new Color(gray, gray, gray));
-    g.setStroke(new BasicStroke((float)1.0));
-
-    double gw = Grid.snap((double)w / zoom) * zoom;
-    double gh = Grid.snap((double)h / zoom) * zoom;
-
-    for(x = 0; x < gw / step; x++)
-    {
-      double gx = ox + (double)x * step;
-      gx = (gx % gw + gw) % gw;
-      g.draw(new Line2D.Double(gx, 0, gx, h));
-    }
-
-    for(y = 0; y < gh / step; y++)
-    {
-      double gy = oy + (double)y * step;
-      gy = (gy % gh + gh) % gh;
-      g.draw(new Line2D.Double(0, gy, w, gy));
-    }
-  }
-*/
 
   public void drawSegmentPreview(Graphics2D g, Color color)
   {
@@ -387,10 +319,6 @@ public class RenderPanel extends JPanel
       g.setStroke(new BasicStroke(2));
       g.draw(new Rectangle2D.Double(x1, y1, x2 - x1, y2 - y1));
     }
-
-    Text tempText = new Text(0, "Hello World!", 12, 1, 2, 2);
-
-    drawText(g, tempText, new Color(255, 255, 255));
   }
 }
 

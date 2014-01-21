@@ -186,8 +186,10 @@ public class SimplePCB
                                - (y - centery) * Math.sin(angle);
           double gy = centery + (x - centerx) * Math.sin(angle)
                                + (y - centery) * Math.cos(angle);
-          trace.x[j] = Grid.snap(gx);
-          trace.y[j] = Grid.snap(gy);
+          trace.x[j] = gx;
+          trace.y[j] = gy;
+          //trace.x[j] = Grid.snap(gx);
+          //trace.y[j] = Grid.snap(gy);
         }
       }
       if(pad.selected)
@@ -198,8 +200,10 @@ public class SimplePCB
                                - (y - centery) * Math.sin(angle);
         double gy = centery + (x - centerx) * Math.sin(angle)
                                - (y - centery) * Math.cos(angle);
-        pad.x = Grid.snap(gx);
-        pad.y = Grid.snap(gy);
+        pad.x = gx;
+        pad.y = gy;
+        //pad.x = Grid.snap(gx);
+        //pad.y = Grid.snap(gy);
       }
     }
 
@@ -496,6 +500,53 @@ public class SimplePCB
     }
   }
 
+  // add text
+  public static void addText(String s, double size) 
+  {
+    // make a new trace group for this text
+    cancelSelection();
+    unselectAll();
+
+    int i, j;
+    double xpos = ox / zoom;
+    double ypos = oy / zoom;
+
+    double pos = 0;
+
+    double scale = .01 * size;
+
+    Trace tempTrace;
+    Letter letter;
+
+    for(i = 0; i < s.length(); i++)
+    {
+      letter = PCBFont.letter[s.charAt(i)];
+
+      double highest = 0;
+
+      for(j = 0; j < letter.length; j++)
+      {
+        double x1 = (double)letter.x1[j];
+        double y1 = (double)letter.y1[j];
+        double x2 = (double)letter.x2[j];
+        double y2 = (double)letter.y2[j];
+
+        if(x1 > highest)
+          highest = x1;
+        if(x2 > highest)
+          highest = x2;
+
+        tempTrace = board.addTrace(layers.current, (xpos + pos + x1) * scale, (ypos + y1) * scale, .5, false);
+        tempTrace.add((xpos + pos + x2) * scale, (ypos + y2) * scale);
+        tempTrace.group = nextGroup;
+      }
+
+      pos += highest + letter.spacing;
+    }
+
+    nextGroup++;
+  }
+ 
   // program entry
   public static void main(String[] args)
   {

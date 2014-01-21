@@ -47,8 +47,8 @@ public class Trace
   public void add(double temp_x, double temp_y)
   {
     // dont put a new point over the last one
-    if(temp_x == x[length] && temp_y == y[length])
-      return;
+    //if(temp_x == x[length] && temp_y == y[length])
+    //  return;
 
     x[length] = temp_x;
     y[length] = temp_y;
