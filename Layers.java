@@ -16,12 +16,8 @@ public class Layers extends JToolBar
   ImageIcon redIcon;
   ImageIcon greenIcon;
   ImageIcon gridIcon;
-  ImageIcon h_yellowIcon;
-  ImageIcon h_redIcon;
-  ImageIcon h_greenIcon;
-  ImageIcon h_gridIcon;
 
-  int current = 0;
+  int current = 2;
 
   Layers()
   {
@@ -32,10 +28,6 @@ public class Layers extends JToolBar
     redIcon = getIcon("/data/red.png");
     greenIcon = getIcon("/data/green.png");
     gridIcon = getIcon("/data/grid.png");
-    h_yellowIcon = getIcon("/data/h_yellow.png");
-    h_redIcon = getIcon("/data/h_red.png");
-    h_greenIcon = getIcon("/data/h_green.png");
-    h_gridIcon = getIcon("/data/h_grid.png");
 
     Border border = BorderFactory.createRaisedBevelBorder();
 
@@ -48,7 +40,7 @@ public class Layers extends JToolBar
       {
         public void actionPerformed(ActionEvent e)
         {
-          setLayer(0);
+          current = 0;
         }
       } );
 
@@ -61,7 +53,7 @@ public class Layers extends JToolBar
       {
         public void actionPerformed(ActionEvent e)
         {
-          setLayer(1);
+          current = 1;
         }
       } );
 
@@ -75,13 +67,13 @@ public class Layers extends JToolBar
       {
         public void actionPerformed(ActionEvent e)
         {
-          setLayer(2);
+          current = 2;
         }
       } );
 
     grid = new JToggleButton();
     grid.setToolTipText("Grid");
-    grid.setIcon(h_gridIcon);
+    grid.setIcon(gridIcon);
     grid.setBorder(border);
     grid.setSelected(true);
     grid.addActionListener(
@@ -90,11 +82,6 @@ public class Layers extends JToolBar
         public void actionPerformed(ActionEvent e)
         {
           Grid.use = grid.isSelected();
-          if(Grid.use)
-            grid.setIcon(h_gridIcon);
-          else
-            grid.setIcon(gridIcon);
-
           SimplePCB.panel.repaint();
         }
       } );
@@ -112,28 +99,6 @@ public class Layers extends JToolBar
 
     // set default button to green
     current = 2;
-  }
-
-  public void setLayer(int layer)
-  {
-    current = layer;
-
-    yellow.setIcon(yellowIcon);
-    red.setIcon(redIcon);
-    green.setIcon(greenIcon);
-
-    switch(layer)
-    {
-      case 0:
-        yellow.setIcon(h_yellowIcon);
-        break;
-      case 1:
-        red.setIcon(h_redIcon);
-        break;
-      case 2:
-        green.setIcon(h_greenIcon);
-        break;
-    }
   }
 
   private ImageIcon getIcon(String s)

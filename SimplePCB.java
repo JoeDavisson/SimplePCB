@@ -74,6 +74,15 @@ public class SimplePCB
       "About", JOptionPane.INFORMATION_MESSAGE);
   }
 
+  // new project
+  public static void newProject() 
+  {
+    cancelSelection();
+    unselectAll();
+    board = new Board(3.0 * 25.4, 2.0 * 25.4);
+    panel.repaint();
+  }
+
   // load project
   public static void loadProject() 
   {
@@ -188,8 +197,6 @@ public class SimplePCB
                                + (y - centery) * Math.cos(angle);
           trace.x[j] = gx;
           trace.y[j] = gy;
-          //trace.x[j] = Grid.snap(gx);
-          //trace.y[j] = Grid.snap(gy);
         }
       }
       if(pad.selected)
@@ -202,8 +209,6 @@ public class SimplePCB
                                - (y - centery) * Math.cos(angle);
         pad.x = gx;
         pad.y = gy;
-        //pad.x = Grid.snap(gx);
-        //pad.y = Grid.snap(gy);
       }
     }
 
@@ -605,7 +610,6 @@ public class SimplePCB
 
     // misc
     tools.setMode(0);
-    layers.setLayer(0);
 
     // key bindings
     panel.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0), "key_delete");
@@ -661,6 +665,46 @@ public class SimplePCB
           }
 
           panel.repaint();
+        }
+      } );
+
+    panel.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(KeyEvent.VK_R, 0), "key_r");
+    panel.getActionMap().put("key_r",
+      new AbstractAction()
+      {
+        public void actionPerformed(ActionEvent e)
+        {
+          rotate();
+        }
+      } );
+
+    panel.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(KeyEvent.VK_F, 0), "key_f");
+    panel.getActionMap().put("key_f",
+      new AbstractAction()
+      {
+        public void actionPerformed(ActionEvent e)
+        {
+          flip();
+        }
+      } );
+
+    panel.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(KeyEvent.VK_M, 0), "key_m");
+    panel.getActionMap().put("key_m",
+      new AbstractAction()
+      {
+        public void actionPerformed(ActionEvent e)
+        {
+          mirror();
+        }
+      } );
+
+    panel.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), "key_escape");
+    panel.getActionMap().put("key_escape",
+      new AbstractAction()
+      {
+        public void actionPerformed(ActionEvent e)
+        {
+          tools.setMode(0);
         }
       } );
 
@@ -764,7 +808,8 @@ public class SimplePCB
           }
           else
           {
-            selectedTrace = null;
+            currentTrace.selected = true;
+            selectedTrace = currentTrace;
             currentTrace = null;
           }
 
@@ -1081,6 +1126,7 @@ public class SimplePCB
             if(currentTrace == null)
             {
               unselectAll();
+              cancelSelection();
               // add first segment
               currentTrace = board.addTrace(layers.current, gridx, gridy, traceSize, false);
               panel.repaint();

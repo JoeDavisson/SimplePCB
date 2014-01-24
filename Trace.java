@@ -14,8 +14,8 @@ public class Trace
 
   Trace(int temp_layer, double temp_size, boolean temp_filled)
   {
-    x = new double[64];
-    y = new double[64];
+    x = new double[256];
+    y = new double[256];
     length = 0;
     size = temp_size;
     status = false;
@@ -29,7 +29,7 @@ public class Trace
   {
     int i;
 
-    for(i = 0; i < 64; i++)
+    for(i = 0; i < 256; i++)
     {
       x[i] = trace.x[i];
       y[i] = trace.y[i];
@@ -52,18 +52,16 @@ public class Trace
 
     x[length] = temp_x;
     y[length] = temp_y;
-    length++;
-    if(length > 64)
-      length = 64;
+    if(length < 256)
+      length++;
   }
 
   public void insert(int pos, double temp_x, double temp_y)
   {
     int i;
 
-    length++;
-    if(length > 64)
-      length = 64;
+    if(length < 256)
+      length++;
 
     for(i = length - 1; i >= pos; i--)
     {

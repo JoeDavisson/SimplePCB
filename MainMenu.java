@@ -12,6 +12,18 @@ public class MainMenu extends JMenuBar
     // file menu
     JMenu fileMenu = new JMenu("File");
 
+    JMenuItem newItem = new JMenuItem("New Project");
+    newItem.addActionListener(
+      new ActionListener()
+      {
+        public void actionPerformed(ActionEvent e)
+        {
+          int response = JOptionPane.showConfirmDialog(SimplePCB.win, "New Project", "Are You Sure?", JOptionPane.YES_NO_OPTION);
+          if(response == JOptionPane.YES_OPTION)
+            SimplePCB.newProject();
+        }
+      } );
+
     JMenuItem loadItem = new JMenuItem("Load Project...");
     loadItem.addActionListener(
       new ActionListener()
@@ -80,6 +92,7 @@ public class MainMenu extends JMenuBar
         }
       } );
 
+    fileMenu.add(newItem);
     fileMenu.add(loadItem);
     fileMenu.add(saveItem);
     fileMenu.add(exportMenu);

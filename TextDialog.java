@@ -57,14 +57,14 @@ public class TextDialog extends JDialog
     topPanel.add(new JLabel("Height"));
     heightField = new JTextField(8);
     heightField.setEditable(true);
-    heightField.setText("5");
+    heightField.setText("2");
     topPanel.add(heightField);
 
     // thickness
     topPanel.add(new JLabel("Thickness"));
     thicknessField = new JTextField(8);
     thicknessField.setEditable(true);
-    thicknessField.setText(".5");
+    thicknessField.setText(".2");
     topPanel.add(thicknessField);
 
     // ok button

@@ -175,7 +175,7 @@ public class RenderPanel extends JPanel
     g.setColor(color);
 
     Trace trace = SimplePCB.currentTrace;
-    if(trace.status && trace.length > 0)
+    if(trace != null && trace.status && trace.length > 0)
     {
       if(trace.filled)
       {

@@ -24,18 +24,7 @@ public class Tools extends JToolBar
     "/data/text.png"
   };
 
-  String[] h_iconFiles =
-  {
-    "/data/h_select.png",
-    "/data/h_edit.png",
-    "/data/h_pad.png",
-    "/data/h_trace.png",
-    "/data/h_rect.png",
-    "/data/h_text.png"
-  };
-
   ImageIcon[] icon;
-  ImageIcon[] h_icon;
 
   Tools()
   {
@@ -43,23 +32,19 @@ public class Tools extends JToolBar
     setFloatable(false);
 
     icon = new ImageIcon[iconFiles.length];
-    h_icon = new ImageIcon[h_iconFiles.length];
 
     Border border = BorderFactory.createRaisedBevelBorder();
 
     int i;
 
     for(i = 0; i < iconFiles.length; i++)
-    {
       icon[i] = getIcon(iconFiles[i]);
-      h_icon[i] = getIcon(h_iconFiles[i]);
-    }
 
     select = new JToggleButton();
     select.setToolTipText("Select");
+    select.setIcon(icon[0]);
     select.setSelected(true);
     select.setBorder(border);
-    select.setContentAreaFilled(false);
     select.addActionListener(
       new ActionListener()
       {
@@ -71,8 +56,8 @@ public class Tools extends JToolBar
 
     edit = new JToggleButton();
     edit.setToolTipText("Edit");
+    edit.setIcon(icon[1]);
     edit.setBorder(border);
-    edit.setContentAreaFilled(false);
     edit.addActionListener(
       new ActionListener()
       {
@@ -84,8 +69,8 @@ public class Tools extends JToolBar
 
     pad = new JToggleButton();
     pad.setToolTipText("Pad");
+    pad.setIcon(icon[2]);
     pad.setBorder(border);
-    pad.setContentAreaFilled(false);
     pad.addActionListener(
       new ActionListener()
       {
@@ -97,8 +82,8 @@ public class Tools extends JToolBar
 
     trace = new JToggleButton();
     trace.setToolTipText("Trace");
+    trace.setIcon(icon[3]);
     trace.setBorder(border);
-    trace.setContentAreaFilled(false);
     trace.addActionListener(
       new ActionListener()
       {
@@ -110,8 +95,8 @@ public class Tools extends JToolBar
 
     rect = new JToggleButton();
     rect.setToolTipText("Rectangle");
+    rect.setIcon(icon[4]);
     rect.setBorder(border);
-    rect.setContentAreaFilled(false);
     rect.addActionListener(
       new ActionListener()
       {
@@ -123,8 +108,8 @@ public class Tools extends JToolBar
 
     text = new JToggleButton();
     text.setToolTipText("Text");
+    text.setIcon(icon[5]);
     text.setBorder(border);
-    text.setContentAreaFilled(false);
     text.addActionListener(
       new ActionListener()
       {
@@ -153,13 +138,6 @@ public class Tools extends JToolBar
 
   public void setMode(int mode)
   {
-    select.setIcon(icon[0]);
-    edit.setIcon(icon[1]);
-    pad.setIcon(icon[2]);
-    trace.setIcon(icon[3]);
-    rect.setIcon(icon[4]);
-    text.setIcon(icon[5]);
-
     select.setSelected(false);
     edit.setSelected(false);
     pad.setSelected(false);
@@ -171,27 +149,21 @@ public class Tools extends JToolBar
     {
       case 0:
         select.setSelected(true);
-        select.setIcon(h_icon[0]);
         break;
       case 1:
         edit.setSelected(true);
-        edit.setIcon(h_icon[1]);
         break;
       case 2:
         pad.setSelected(true);
-        pad.setIcon(h_icon[2]);
         break;
       case 3:
         trace.setSelected(true);
-        trace.setIcon(h_icon[3]);
         break;
       case 4:
         rect.setSelected(true);
-        rect.setIcon(h_icon[4]);
         break;
       case 5:
         text.setSelected(true);
-        text.setIcon(h_icon[5]);
         break;
     }
 

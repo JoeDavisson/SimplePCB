@@ -8,6 +8,7 @@ public class TopBar extends JToolBar
 {
   String traceSizeStrings[] =
   {
+    ".2 mm",
     ".4 mm (~.015\")",
     ".6 mm (~.025\")",
     ".8 mm (~.03\")",
@@ -31,6 +32,7 @@ public class TopBar extends JToolBar
  
   double traceSize[] =
   {
+    .2,
     .4,
     .6,
     .8,
