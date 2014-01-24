@@ -26,7 +26,8 @@ import javax.swing.text.*;
 public class TextDialog extends JDialog
 {
   public JTextField textField;
-  public JTextField sizeField;
+  public JTextField heightField;
+  public JTextField thicknessField;
 
   // ok/cancel
   public JButton okButton;
@@ -41,7 +42,7 @@ public class TextDialog extends JDialog
     setLayout(new BorderLayout());
 
     // panels
-    JPanel topPanel = new JPanel(new GridLayout(2, 1, 0, 0));
+    JPanel topPanel = new JPanel(new GridLayout(3, 1, 0, 0));
     JPanel buttonFlowPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
     JPanel buttonGridPanel = new JPanel(new GridLayout(1, 2, 8, 0));
 
@@ -52,12 +53,19 @@ public class TextDialog extends JDialog
     textField.setText("Text");
     topPanel.add(textField);
 
-    // text
-    topPanel.add(new JLabel("Size"));
-    sizeField = new JTextField(8);
-    sizeField.setEditable(true);
-    sizeField.setText("10");
-    topPanel.add(sizeField);
+    // height
+    topPanel.add(new JLabel("Height"));
+    heightField = new JTextField(8);
+    heightField.setEditable(true);
+    heightField.setText("5");
+    topPanel.add(heightField);
+
+    // thickness
+    topPanel.add(new JLabel("Thickness"));
+    thicknessField = new JTextField(8);
+    thicknessField.setEditable(true);
+    thicknessField.setText(".5");
+    topPanel.add(thicknessField);
 
     // ok button
     okButton = new JButton("OK");
@@ -66,7 +74,10 @@ public class TextDialog extends JDialog
       {
         public void actionPerformed(ActionEvent e)
         {
-          SimplePCB.addText(textField.getText(), Double.parseDouble(sizeField.getText()));
+          SimplePCB.addText(textField.getText(),
+                            Double.parseDouble(heightField.getText()),
+                            Double.parseDouble(thicknessField.getText()));
+          SimplePCB.tools.setMode(0);
           dispose();
         }
       } );
@@ -79,6 +90,7 @@ public class TextDialog extends JDialog
       {
         public void actionPerformed(ActionEvent e)
         {
+          SimplePCB.tools.setMode(0);
           dispose();
         }
       } );

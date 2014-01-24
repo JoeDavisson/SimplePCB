@@ -291,7 +291,8 @@ public class RenderPanel extends JPanel
         highlightTrace(g, board.trace[i]);
 
     // grid
-    drawGrid(g, w, h);
+    if(Grid.use)
+      drawGrid(g, w, h);
 
     // rubber band select
     if(SimplePCB.selectRectStatus)

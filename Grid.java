@@ -5,6 +5,7 @@ public class Grid
   public static int mag = 10;
   public static int line = 4;
   public static boolean inches = false;
+  public static boolean use = true;
 
   public static void setInches(double spacing)
   {

@@ -297,8 +297,17 @@ public class SimplePCB
     mousey = input.mousey;
     x = (double)(mousex - ox) / zoom;
     y = (double)(mousey - oy) / zoom;
-    gridx = Grid.snap(x);
-    gridy = Grid.snap(y);
+
+    if(Grid.use)
+    {
+      gridx = Grid.snap(x);
+      gridy = Grid.snap(y);
+    }
+    else
+    {
+      gridx = x;
+      gridy = y;
+    }
   }
 
   // point on line test
@@ -501,19 +510,17 @@ public class SimplePCB
   }
 
   // add text
-  public static void addText(String s, double size) 
+  public static void addText(String s, double height, double size) 
   {
     // make a new trace group for this text
     cancelSelection();
     unselectAll();
 
     int i, j;
-    double xpos = ox / zoom;
-    double ypos = oy / zoom;
 
     double pos = 0;
 
-    double scale = .01 * size;
+    double scale = .01 * height;
 
     Trace tempTrace;
     Letter letter;
@@ -536,8 +543,8 @@ public class SimplePCB
         if(x2 > highest)
           highest = x2;
 
-        tempTrace = board.addTrace(layers.current, (xpos + pos + x1) * scale, (ypos + y1) * scale, .5, false);
-        tempTrace.add((xpos + pos + x2) * scale, (ypos + y2) * scale);
+        tempTrace = board.addTrace(layers.current, (pos + x1) * scale, (y1) * scale, size, false);
+        tempTrace.add((pos + x2) * scale, (y2) * scale);
         tempTrace.group = nextGroup;
       }
 
@@ -595,6 +602,10 @@ public class SimplePCB
     panel.addMouseWheelListener(input);
     //panel.addKeyListener(input);
     panel.setFocusable(true);
+
+    // misc
+    tools.setMode(0);
+    layers.setLayer(0);
 
     // key bindings
     panel.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0), "key_delete");
