@@ -18,7 +18,7 @@ public class MainMenu extends JMenuBar
       {
         public void actionPerformed(ActionEvent e)
         {
-          int response = JOptionPane.showConfirmDialog(SimplePCB.win, "New Project", "Are You Sure?", JOptionPane.YES_NO_OPTION);
+          int response = JOptionPane.showConfirmDialog(SimplePCB.win, "Are You Sure?", "New Project", JOptionPane.YES_NO_OPTION);
           if(response == JOptionPane.YES_OPTION)
             SimplePCB.newProject();
         }
