@@ -65,6 +65,7 @@ public class PCBFont
 
     letter[' '].spacing = 18;
 
+    /*
     for(i = 0; i < 256; i++)
     {
       if(letter[i].spacing > 0)
@@ -78,6 +79,7 @@ public class PCBFont
         }
       }
     }
+    */
   }
 }
 

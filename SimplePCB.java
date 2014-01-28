@@ -514,6 +514,34 @@ public class SimplePCB
     }
   }
 
+  // duplicate selected
+  public static void duplicate()
+  {
+    int i;
+
+    for(i = 0; i < board.max; i++)
+    {
+      Pad tempPad = board.pad[i];
+      Trace tempTrace = board.trace[i];
+
+      if(tempPad.selected)
+      {
+        Pad temp = board.addPad(tempPad.layer, tempPad.x, tempPad.y,
+                                tempPad.innerSize, tempPad.outerSize);
+        temp.selected = false;
+      }
+
+      if(tempTrace.selected)
+      {
+        Trace temp = board.addTrace(0, 0, 0, 0, false);
+        temp.copy(tempTrace);
+        temp.selected = false;
+      }
+    }
+
+    panel.repaint();
+  }
+
   // add text
   public static void addText(String s, double height, double size) 
   {
@@ -1119,7 +1147,7 @@ public class SimplePCB
             break;
           case 2:
             unselectAll();
-            board.addPad(layers.current, gridx, gridy, padInnerSize, padOuterSize);
+            Pad temp = board.addPad(layers.current, gridx, gridy, padInnerSize, padOuterSize);
             break;
           case 3:
             // new trace

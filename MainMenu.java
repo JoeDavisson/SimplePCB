@@ -110,6 +110,7 @@ public class MainMenu extends JMenuBar
       {
         public void actionPerformed(ActionEvent e)
         {
+          SimplePCB.duplicate();
         }
       } );
 

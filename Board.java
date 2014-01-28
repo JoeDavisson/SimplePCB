@@ -2,7 +2,7 @@ import java.io.*;
 
 public class Board
 {
-  int max = 4096;
+  int max = 65536;
 
   public double w, h;
 
@@ -31,7 +31,7 @@ public class Board
     }
   }
 
-  public void addPad(int layer, double x, double y, double innerSize, double outerSize)
+  public Pad addPad(int layer, double x, double y, double innerSize, double outerSize)
   {
     int i;
     int use = -1;
@@ -46,7 +46,8 @@ public class Board
     }
 
     if(use == -1)
-      return;
+      use = 0;
+    //  return;
 
     pad[use].layer = layer;
     pad[use].x = x;
@@ -54,6 +55,8 @@ public class Board
     pad[use].innerSize = innerSize;
     pad[use].outerSize = outerSize;
     pad[use].status = true;
+
+    return pad[use];
   }
 
   public Trace addTrace(int layer, double x, double y, double size, boolean filled)
