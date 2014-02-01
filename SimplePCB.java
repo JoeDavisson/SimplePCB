@@ -114,7 +114,7 @@ public class SimplePCB
   }
 
   // save gerber
-  public static void exportLayer(int layer) 
+  public static void exportGerberLayer(int layer) 
   {
     final JFileChooser fc = new JFileChooser();
 
@@ -128,6 +128,24 @@ public class SimplePCB
           return;
       }
       Gerber.save(board, file, layer);
+    }
+  }
+
+  // save PNG
+  public static void exportPngLayer(int layer) 
+  {
+    final JFileChooser fc = new JFileChooser();
+
+    if(fc.showSaveDialog(win) == JFileChooser.APPROVE_OPTION)
+    {
+      File file = fc.getSelectedFile();
+      if(file != null && file.exists())
+      {
+        int response = JOptionPane.showConfirmDialog(win, "\"" + file.getName() + "\" exists, overwrite?", "File Exists", JOptionPane.YES_NO_OPTION);
+        if(response != JOptionPane.YES_OPTION)
+          return;
+      }
+      Png.save(board, file, layer);
     }
   }
 

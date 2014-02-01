@@ -44,42 +44,79 @@ public class MainMenu extends JMenuBar
         }
       } );
 
-    // export
-    JMenu exportMenu = new JMenu("Export");
+    // export gerber
+    JMenu exportGerberMenu = new JMenu("Export Gerber");
 
-    JMenuItem yellowItem = new JMenuItem("Artwork Layer...");
-    yellowItem.addActionListener(
+    JMenuItem gerberItem0 = new JMenuItem("Artwork Layer...");
+    gerberItem0.addActionListener(
       new ActionListener()
       {
         public void actionPerformed(ActionEvent e)
         {
-          SimplePCB.exportLayer(0);
+          SimplePCB.exportGerberLayer(0);
         }
       } );
 
-    JMenuItem redItem = new JMenuItem("Top Layer...");
-    redItem.addActionListener(
+    JMenuItem gerberItem1 = new JMenuItem("Top Layer...");
+    gerberItem1.addActionListener(
       new ActionListener()
       {
         public void actionPerformed(ActionEvent e)
         {
-          SimplePCB.exportLayer(1);
+          SimplePCB.exportGerberLayer(1);
         }
       } );
 
-    JMenuItem greenItem = new JMenuItem("Bottom Layer...");
-    greenItem.addActionListener(
+    JMenuItem gerberItem2 = new JMenuItem("Bottom Layer...");
+    gerberItem2.addActionListener(
       new ActionListener()
       {
         public void actionPerformed(ActionEvent e)
         {
-          SimplePCB.exportLayer(2);
+          SimplePCB.exportGerberLayer(2);
         }
       } );
 
-    exportMenu.add(yellowItem);
-    exportMenu.add(redItem);
-    exportMenu.add(greenItem);
+    exportGerberMenu.add(gerberItem0);
+    exportGerberMenu.add(gerberItem1);
+    exportGerberMenu.add(gerberItem2);
+
+    // export PNG
+    JMenu exportPngMenu = new JMenu("Export PNG");
+
+    JMenuItem pngItem0 = new JMenuItem("Artwork Layer...");
+    pngItem0.addActionListener(
+      new ActionListener()
+      {
+        public void actionPerformed(ActionEvent e)
+        {
+          SimplePCB.exportPngLayer(0);
+        }
+      } );
+
+    JMenuItem pngItem1 = new JMenuItem("Top Layer...");
+    pngItem1.addActionListener(
+      new ActionListener()
+      {
+        public void actionPerformed(ActionEvent e)
+        {
+          SimplePCB.exportPngLayer(1);
+        }
+      } );
+
+    JMenuItem pngItem2 = new JMenuItem("Bottom Layer...");
+    pngItem2.addActionListener(
+      new ActionListener()
+      {
+        public void actionPerformed(ActionEvent e)
+        {
+          SimplePCB.exportPngLayer(2);
+        }
+      } );
+
+    exportPngMenu.add(pngItem0);
+    exportPngMenu.add(pngItem1);
+    exportPngMenu.add(pngItem2);
 
     // quit
     JMenuItem quitItem = new JMenuItem("Quit");
@@ -95,7 +132,9 @@ public class MainMenu extends JMenuBar
     fileMenu.add(newItem);
     fileMenu.add(loadItem);
     fileMenu.add(saveItem);
-    fileMenu.add(exportMenu);
+    fileMenu.addSeparator();
+    fileMenu.add(exportGerberMenu);
+    fileMenu.add(exportPngMenu);
     fileMenu.addSeparator();
     fileMenu.add(quitItem);
 
